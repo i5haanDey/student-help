@@ -72,6 +72,10 @@ const EXAM_CATEGORIES_BY_GRADE: Record<string, ExamCategory[]> = {
       items: ["CBSE Board", "ICSE Board", "IB Board", "Cambridge IGCSE", { group: "State Boards" }],
     },
     {
+      label: "Engineering",
+      items: ["JEE Main", "JEE Advanced", { group: "State Engineering Exams" }, { group: "Private University Exams" }],
+    },
+    {
       label: "Olympiad",
       items: ["NSO", "IMO", "NCO", "NTSE"],
     },
@@ -81,6 +85,10 @@ const EXAM_CATEGORIES_BY_GRADE: Record<string, ExamCategory[]> = {
     {
       label: "Board Exams",
       items: ["CBSE Board", "ICSE Board", "IB Board", "Cambridge IGCSE", { group: "State Boards" }],
+    },
+    {
+      label: "Engineering",
+      items: ["JEE Main", "JEE Advanced", { group: "State Engineering Exams" }, { group: "Private University Exams" }],
     },
     {
       label: "Olympiad",
@@ -94,6 +102,10 @@ const EXAM_CATEGORIES_BY_GRADE: Record<string, ExamCategory[]> = {
       items: ["CBSE Board", "ICSE Board", "IB Board", "Cambridge IGCSE", { group: "State Boards" }],
     },
     {
+      label: "Engineering",
+      items: ["JEE Main", "JEE Advanced", { group: "State Engineering Exams" }, { group: "Private University Exams" }],
+    },
+    {
       label: "Olympiad",
       items: ["NSO", "IMO", "NCO", "NTSE", "KVPY"],
     },
@@ -105,6 +117,10 @@ const EXAM_CATEGORIES_BY_GRADE: Record<string, ExamCategory[]> = {
       items: ["CBSE Board", "ICSE Board", "IB Board", "Cambridge IGCSE", { group: "State Boards" }],
     },
     {
+      label: "Engineering",
+      items: ["JEE Main", "JEE Advanced", { group: "State Engineering Exams" }, { group: "Private University Exams" }],
+    },
+    {
       label: "Olympiad",
       items: ["NSO", "IMO", "NTSE", "KVPY", "PRMO", "NSEP", "NSEB"],
     },
@@ -114,6 +130,10 @@ const EXAM_CATEGORIES_BY_GRADE: Record<string, ExamCategory[]> = {
     {
       label: "Board Exams",
       items: ["CBSE Board", "ICSE Board", "IB Board", "Cambridge IGCSE", { group: "State Boards" }],
+    },
+    {
+      label: "Engineering",
+      items: ["JEE Main", "JEE Advanced", { group: "State Engineering Exams" }, { group: "Private University Exams" }],
     },
     {
       label: "Olympiad",
