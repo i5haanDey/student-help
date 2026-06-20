@@ -9,16 +9,14 @@ import { ActiveSession } from "@/components/session/active-session"
 import { PostSession } from "@/components/session/post-session"
 
 interface SessionData {
-  booking: {
-    id: string
-    subject: string
-    sessionType: string
-    durationMinutes: number
-    status: string
-    startsAt: string | null
-    student: { id: string; displayName: string }
-    teacher: { id: string; displayName: string }
-  }
+  id: string
+  subject: string
+  sessionType: string
+  durationMinutes: number
+  status: string
+  startsAt: string | null
+  student: { id: string; displayName: string }
+  teacher: { id: string; displayName: string }
   liveSession: {
     id: string
     roomName: string | null
@@ -89,7 +87,7 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
   }
 
   const otherName = data
-    ? role === "student" ? data.booking.teacher.displayName : data.booking.student.displayName
+    ? role === "student" ? data.teacher.displayName : data.student.displayName
     : ""
 
   if (isLoading) {
@@ -115,12 +113,12 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
     return (
       <ActiveSession
         liveSessionId={data.liveSession.id}
-        bookingId={data.booking.id}
+        bookingId={data.id}
         roomName={data.liveSession.roomName ?? ""}
         token={liveToken}
         livekitUrl={livekitUrl}
         profileId={profileId}
-        displayName={role === "student" ? data.booking.student.displayName : data.booking.teacher.displayName}
+        displayName={role === "student" ? data.student.displayName : data.teacher.displayName}
         role={role}
         otherName={otherName}
         onEnd={() => setPhase("post")}
@@ -133,7 +131,7 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
       <PostSession
         liveSessionId={data.liveSession?.id ?? ""}
         role={role}
-        subject={data.booking.subject}
+        subject={data.subject}
       />
     )
   }
@@ -141,10 +139,10 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
       <SessionLobby
-        bookingId={data.booking.id}
-        subject={data.booking.subject}
-        teacherName={data.booking.teacher.displayName}
-        studentName={data.booking.student.displayName}
+        bookingId={data.id}
+        subject={data.subject}
+        teacherName={data.teacher.displayName}
+        studentName={data.student.displayName}
         role={role}
         onJoin={handleJoin}
       />
