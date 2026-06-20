@@ -66,7 +66,7 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-14 h-14 rounded-xl border bg-muted/50 flex items-center justify-center">
+        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
           <AlertTriangle className="h-6 w-6 text-muted-foreground/60" />
         </div>
         <p className="text-muted-foreground">Session details not found.</p>
@@ -87,31 +87,31 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
 
   return (
     <div className="container mx-auto px-4 md:px-6 py-8 max-w-4xl">
-      <Button variant="ghost" size="sm" onClick={() => router.push(`/${role}/sessions`)} className="mb-6">
-        <ArrowLeft className="h-4 w-4 mr-2" /> My Sessions
+      <Button variant="ghost" size="sm" onClick={() => router.push(`/${role}/sessions`)} className="mb-6 group">
+        <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" /> My Sessions
       </Button>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <Avatar className="h-16 w-16">
+                <Avatar className="h-16 w-16 ring-2 ring-border">
                   <AvatarImage src={person?.avatarUrl ?? ""} />
-                  <AvatarFallback className="bg-muted text-lg font-bold">
+                  <AvatarFallback className="bg-muted text-lg font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{booking.subject}</h1>
+                <h1 className="text-2xl font-bold tracking-tight">{booking.subject}</h1>
                 <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                   <User className="h-3.5 w-3.5" />
                   {role === "student" ? "Teacher" : "Student"}: {displayName}
                 </p>
               </div>
             </div>
-            <Badge variant={config.variant} className="self-start text-xs px-3 py-1 gap-1.5">
+            <Badge variant={config.variant} className="self-start text-xs px-3 py-1 gap-1.5 shadow-sm">
               <StatusIcon className="h-3 w-3" />
               {config.label}
             </Badge>
@@ -120,25 +120,25 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
         <CardContent>
           <div className="flex flex-wrap gap-3 text-sm">
             {startDate && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span>{startDate.toLocaleDateString("en-US", {
                   weekday: "short", month: "short", day: "numeric", year: "numeric",
                 })}</span>
               </div>
             )}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>{totalActualDuration > 0 ? `${totalActualDuration} min` : `${booking.durationMinutes} min`}</span>
             </div>
             {booking.amountInr && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
                 <IndianRupee className="h-4 w-4 text-muted-foreground" />
                 <span>{booking.amountInr.toLocaleString()}</span>
               </div>
             )}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
-              <span className="text-muted-foreground capitalize">{booking.sessionType}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted">
+              <span className="capitalize text-muted-foreground">{booking.sessionType}</span>
             </div>
           </div>
         </CardContent>
@@ -169,10 +169,10 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
 
           <TabsContent value="overview" className="space-y-6">
             {liveSession?.summaryText && (
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-muted-foreground" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     AI Session Summary
                   </CardTitle>
                 </CardHeader>
@@ -183,10 +183,10 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
             )}
 
             {!rating && role === "student" && booking.status === "completed" && (
-              <Card className="border-dashed">
+              <Card className="border-dashed shadow-sm">
                 <CardContent className="py-8 text-center">
-                  <div className="mx-auto w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4">
-                    <Star className="h-6 w-6 text-muted-foreground" />
+                  <div className="mx-auto w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mb-4">
+                    <Star className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                   </div>
                   <p className="text-sm font-medium mb-1">Rate this session</p>
                   <p className="text-xs text-muted-foreground mb-4">Your feedback helps other students find great teachers.</p>
@@ -206,7 +206,7 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
 
           {chatMessages.length > 0 && (
             <TabsContent value="chat">
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <MessageSquare className="h-4 w-4 text-muted-foreground" />
@@ -249,7 +249,7 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
 
           {practiceSet && (
             <TabsContent value="practice">
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -257,8 +257,8 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                    <div className="p-2 rounded-lg bg-muted">
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+                    <div className="p-2.5 rounded-xl bg-muted">
                       <Zap className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
@@ -280,7 +280,7 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
 
           {rating && (
             <TabsContent value="rating">
-              <Card>
+              <Card className="shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Star className="h-4 w-4 text-amber-400" />
@@ -304,7 +304,7 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
                     <span className="text-lg font-bold">{rating.stars}/5</span>
                   </div>
                   {rating.comment && (
-                    <div className="p-3 rounded-lg bg-muted/30 italic text-sm text-muted-foreground">
+                    <div className="p-3 rounded-xl bg-muted/30 italic text-sm text-muted-foreground">
                       &ldquo;{rating.comment}&rdquo;
                     </div>
                   )}
@@ -316,8 +316,8 @@ export function SessionDetailsView({ bookingId, role }: SessionDetailsViewProps)
       </div>
 
       <div className="mt-8 text-center">
-        <Button variant="outline" onClick={() => router.push(`/${role}/sessions`)}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Sessions
+        <Button variant="outline" onClick={() => router.push(`/${role}/sessions`)} className="group">
+          <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" /> Back to Sessions
         </Button>
       </div>
     </div>

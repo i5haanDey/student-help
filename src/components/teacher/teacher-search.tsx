@@ -82,7 +82,7 @@ export function TeacherSearch() {
 
   return (
     <div className="space-y-8">
-      <div className="border rounded-lg p-6 md:p-8">
+      <div className="rounded-xl border bg-card p-8 shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight">Find a Teacher</h1>
         <p className="text-muted-foreground mt-2 max-w-xl">
           Connect with verified expert teachers for live 1-on-1 sessions. Search by subject, rate, or availability.
@@ -97,7 +97,7 @@ export function TeacherSearch() {
               placeholder="Search by name or subject..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 h-11 bg-background"
+              className="pl-10 h-11"
             />
             {search && (
               <button
@@ -175,8 +175,8 @@ export function TeacherSearch() {
         </div>
       ) : teachers.length === 0 ? (
         <div className="text-center py-20">
-          <div className="mx-auto w-16 h-16 rounded-xl border bg-muted/50 flex items-center justify-center mb-4">
-            <BookOpen className="h-8 w-8 text-muted-foreground/40" />
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-5">
+            <BookOpen className="h-8 w-8 text-muted-foreground/50" />
           </div>
           <h3 className="text-lg font-semibold mb-2">No teachers found</h3>
           <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
@@ -194,13 +194,13 @@ export function TeacherSearch() {
             const initials = getInitials(teacher.displayName)
             return (
               <Link key={teacher.id} href={`/student/teachers/${teacher.id}`}>
-                <Card className="group transition-shadow hover:shadow-md cursor-pointer h-full">
+                <Card className="group transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer h-full">
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
                       <div className="relative shrink-0">
-                        <Avatar className="h-14 w-14">
+                        <Avatar className="h-14 w-14 ring-1 ring-border">
                           <AvatarImage src={teacher.avatarUrl ?? ""} />
-                          <AvatarFallback className="bg-muted text-lg font-bold">
+                          <AvatarFallback className="bg-muted text-lg font-semibold">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
@@ -222,22 +222,22 @@ export function TeacherSearch() {
                           {teacher.bio ?? "Experienced educator ready to help you master your subjects."}
                         </p>
                         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1.5 bg-muted/50 px-2 py-0.5 rounded-md">
                             <BookOpen className="h-3 w-3" />
                             {teacher.subjects.slice(0, 2).join(", ")}
                             {teacher.subjects.length > 2 && ` +${teacher.subjects.length - 2}`}
                           </span>
                           {teacher.hourlyRateInr && (
-                            <span className="flex items-center gap-1 font-medium">
+                            <span className="flex items-center gap-1 bg-muted/50 px-2 py-0.5 rounded-md font-medium">
                               <IndianRupee className="h-3 w-3" />
                               {teacher.hourlyRateInr}/hr
                             </span>
                           )}
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1 bg-muted/50 px-2 py-0.5 rounded-md">
                             <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                             {teacher.compositeScore.toFixed(1)}
                           </span>
-                          <span>
+                          <span className="bg-muted/50 px-2 py-0.5 rounded-md">
                             {teacher.totalSessions} sessions
                           </span>
                         </div>

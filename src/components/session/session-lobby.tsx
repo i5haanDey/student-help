@@ -74,7 +74,7 @@ export function SessionLobby({
       <div className="w-full max-w-lg mx-auto">
         <Card>
           <CardHeader className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-destructive/10 mb-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 mb-5">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <CardTitle className="text-2xl">Teacher Didn't Join</CardTitle>
@@ -105,7 +105,7 @@ export function SessionLobby({
       <div className="w-full max-w-lg mx-auto">
         <Card>
           <CardHeader className="text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-destructive/10 mb-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 mb-5">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <CardTitle className="text-2xl">Grace Period Expired</CardTitle>
@@ -125,13 +125,13 @@ export function SessionLobby({
 
   return (
     <div className="w-full max-w-lg mx-auto">
-      <Card>
-        <CardHeader className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-muted mb-4">
+      <Card className="shadow-lg">
+        <CardHeader className="text-center pb-4">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-5">
             {waitingForTeacher ? (
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             ) : (
-              <Monitor className="h-8 w-8 text-muted-foreground" />
+              <Monitor className="h-8 w-8 text-primary" />
             )}
           </div>
           <CardTitle className="text-2xl">
@@ -170,7 +170,7 @@ export function SessionLobby({
         </CardHeader>
 
         <CardContent className="space-y-5">
-          <div className="rounded-lg border bg-muted/20 p-4 space-y-3 text-sm">
+          <div className="rounded-xl border bg-muted/20 p-4 space-y-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground flex items-center gap-2">
                 <BookOpenIcon className="h-3.5 w-3.5 text-muted-foreground" />
@@ -186,7 +186,7 @@ export function SessionLobby({
               <span className="font-mono text-xs text-muted-foreground">{bookingId.slice(0, 10)}...</span>
             </div>
             {role === "teacher" && (
-              <div className="flex items-center justify-between pt-1 border-t">
+              <div className="flex items-center justify-between pt-2 border-t border-dashed">
                 <span className="text-muted-foreground flex items-center gap-2">
                   <Users className="h-3.5 w-3.5" />
                   Student Status
@@ -208,7 +208,7 @@ export function SessionLobby({
                 <Button
                   variant="outline"
                   size="lg"
-                  className={`flex-col gap-1 h-auto py-4 px-6 ${!micEnabled ? "border-destructive" : ""}`}
+                  className={`flex-col gap-1 h-auto py-4 px-6 transition-colors ${!micEnabled ? "border-destructive/50 bg-destructive/5" : ""}`}
                   onClick={() => setMicEnabled(!micEnabled)}
                 >
                   {micEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5 text-destructive" />}
@@ -217,14 +217,14 @@ export function SessionLobby({
                 <Button
                   variant="outline"
                   size="lg"
-                  className={`flex-col gap-1 h-auto py-4 px-6 ${!cameraEnabled ? "border-destructive" : ""}`}
+                  className={`flex-col gap-1 h-auto py-4 px-6 transition-colors ${!cameraEnabled ? "border-destructive/50 bg-destructive/5" : ""}`}
                   onClick={() => setCameraEnabled(!cameraEnabled)}
                 >
                   {cameraEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5 text-destructive" />}
                   <span className="text-xs">{cameraEnabled ? "Camera On" : "Camera Off"}</span>
                 </Button>
               </div>
-              <Button className="w-full h-12 text-base" onClick={handleJoin} disabled={isJoining}>
+              <Button className="w-full h-12 text-base shadow-sm" onClick={handleJoin} disabled={isJoining}>
                 {isJoining ? (
                   <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Starting...</>
                 ) : (
@@ -235,11 +235,7 @@ export function SessionLobby({
           )}
 
           {role === "teacher" && teacherJoined && !admitted && (
-            <Button
-              className="w-full h-12 text-base"
-              onClick={handleAdmit}
-              disabled={isAdmitting}
-            >
+            <Button className="w-full h-12 text-base shadow-sm" onClick={handleAdmit} disabled={isAdmitting}>
               {isAdmitting ? (
                 <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Admitting...</>
               ) : (
@@ -251,7 +247,7 @@ export function SessionLobby({
           {role === "teacher" && teacherJoined && admitted && (
             <div className="text-center py-6">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
                 <div>
                   <p className="text-sm font-medium">Student has been admitted</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Waiting for them to join the session...</p>
@@ -261,11 +257,7 @@ export function SessionLobby({
           )}
 
           {role === "student" && teacherJoined && admitted && (
-            <Button
-              className="w-full h-12 text-base"
-              onClick={handleJoin}
-              disabled={isJoining}
-            >
+            <Button className="w-full h-12 text-base shadow-sm" onClick={handleJoin} disabled={isJoining}>
               {isJoining ? (
                 <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Joining...</>
               ) : (
@@ -277,7 +269,7 @@ export function SessionLobby({
           {role === "student" && (!teacherJoined || !admitted) && (
             <div className="text-center py-8">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
                 <div>
                   <p className="text-sm font-medium">
                     {!teacherJoined

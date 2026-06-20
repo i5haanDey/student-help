@@ -24,6 +24,25 @@ interface Session {
   teacher: { id: string; displayName: string; avatarUrl: string | null }
 }
 
+const subjectAccent: Record<string, string> = {
+  mathematics: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  physics: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  chemistry: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  biology: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+  "computer science": "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
+  english: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+  history: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  geography: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300",
+  economics: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
+}
+
+function getSubjectAccent(subject: string): string {
+  for (const [key, cls] of Object.entries(subjectAccent)) {
+    if (subject.toLowerCase().includes(key)) return cls
+  }
+  return "bg-muted text-muted-foreground"
+}
+
 const statusConfig: Record<string, { variant: "default" | "secondary" | "outline" | "success" | "warning" | "destructive"; label: string; icon: LucideIcon }> = {
   pending: { variant: "warning", label: "Pending", icon: Clock },
   confirmed: { variant: "success", label: "Confirmed", icon: Shield },
@@ -78,8 +97,8 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
   if (upcoming.length === 0 && past.length === 0) {
     return (
       <div className="text-center py-20">
-        <div className="mx-auto w-16 h-16 rounded-xl border bg-muted/50 flex items-center justify-center mb-4">
-          <Video className="h-8 w-8 text-muted-foreground/60" />
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-5">
+          <Video className="h-8 w-8 text-muted-foreground/50" />
         </div>
         <h3 className="text-lg font-semibold mb-2">No sessions yet</h3>
         <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
@@ -107,11 +126,14 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
     const StatusIcon = config.icon
     const isLive = session.status === "in_progress"
     const initials = getInitials(person?.displayName ?? "?")
+    const accent = getSubjectAccent(session.subject)
 
     return (
       <Card
         key={session.id}
-        className={`transition-shadow ${canView ? "cursor-pointer hover:shadow-md" : ""} ${isLive ? "ring-1 ring-primary/20" : ""}`}
+        className={`group transition-all duration-200 ${
+          canView ? "cursor-pointer hover:shadow-md hover:-translate-y-0.5" : ""
+        } ${isLive ? "shadow-md" : "shadow-sm hover:shadow-md"}`}
         onClick={() => {
           if (canView) router.push(`/${role}/sessions/${session.id}/details`)
         }}
@@ -120,7 +142,7 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4 min-w-0 flex-1">
               <div className="relative shrink-0">
-                <Avatar className="h-12 w-12">
+                <Avatar className="h-12 w-12 ring-1 ring-border">
                   <AvatarImage src={person?.avatarUrl ?? ""} />
                   <AvatarFallback className="bg-muted text-sm font-medium">
                     {initials}
@@ -130,7 +152,7 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
                   <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-green-500 border-2 border-background" />
                 )}
               </div>
-              <div className="min-w-0 space-y-1.5">
+              <div className="min-w-0 space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-semibold text-sm">{person?.displayName}</p>
                   <Badge variant={config.variant} className="text-[10px] px-2 py-0 gap-1">
@@ -141,13 +163,11 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
                     {session.sessionType}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-muted">
-                    <BookOpen className="h-3 w-3" />
-                    {session.subject}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${accent}`}>
+                  <BookOpen className="h-3 w-3" />
+                  {session.subject}
+                </span>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap pt-0.5">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {session.durationMinutes} min
@@ -170,7 +190,7 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 pt-1">
               {canJoin && (
                 <Button
                   size="sm"
@@ -183,9 +203,10 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
                 <Button
                   size="sm"
                   variant="outline"
+                  className="group/btn"
                   onClick={(e) => { e.stopPropagation(); router.push(`/${role}/sessions/${session.id}/details`) }}
                 >
-                  Details <ArrowRight className="h-3 w-3 ml-1" />
+                  Details <ArrowRight className="h-3 w-3 ml-1 transition-transform group-hover/btn:translate-x-0.5" />
                 </Button>
               )}
             </div>
@@ -222,7 +243,7 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
         <TabsContent value="upcoming" className="space-y-3 mt-4">
           {upcoming.length === 0 ? (
             <div className="text-center py-16">
-              <div className="mx-auto w-12 h-12 rounded-lg border bg-muted/50 flex items-center justify-center mb-3">
+              <div className="mx-auto w-14 h-14 rounded-xl bg-muted flex items-center justify-center mb-4">
                 <Play className="h-6 w-6 text-muted-foreground/40" />
               </div>
               <p className="text-muted-foreground">All caught up! No upcoming sessions.</p>
@@ -240,7 +261,7 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
         <TabsContent value="past" className="space-y-3 mt-4">
           {past.length === 0 ? (
             <div className="text-center py-16">
-              <div className="mx-auto w-12 h-12 rounded-lg border bg-muted/50 flex items-center justify-center mb-3">
+              <div className="mx-auto w-14 h-14 rounded-xl bg-muted flex items-center justify-center mb-4">
                 <History className="h-6 w-6 text-muted-foreground/40" />
               </div>
               <p className="text-muted-foreground">No session history yet.</p>
@@ -271,5 +292,3 @@ function BookOpen({ className }: { className?: string }) {
     </svg>
   )
 }
-
-

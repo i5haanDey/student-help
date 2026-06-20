@@ -100,7 +100,7 @@ export function TeacherDashboardClient({ data }: { data: TeacherDashboardData })
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -130,7 +130,7 @@ export function TeacherDashboardClient({ data }: { data: TeacherDashboardData })
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -179,7 +179,7 @@ export function TeacherDashboardClient({ data }: { data: TeacherDashboardData })
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -190,7 +190,7 @@ export function TeacherDashboardClient({ data }: { data: TeacherDashboardData })
           <CardContent>
             {data.upcomingSessions.length === 0 ? (
               <div className="text-center py-8 space-y-2">
-                <Calendar className="h-8 w-8 text-muted-foreground/40 mx-auto" />
+                <Calendar className="h-8 w-8 text-muted-foreground/30 mx-auto" />
                 <p className="text-sm text-muted-foreground">No upcoming sessions.</p>
                 <Link href="/teacher/schedule">
                   <span className="text-sm text-primary hover:underline cursor-pointer">Set your availability &rarr;</span>
@@ -199,8 +199,8 @@ export function TeacherDashboardClient({ data }: { data: TeacherDashboardData })
             ) : (
               <div className="space-y-3">
                 {data.upcomingSessions.slice(0, 5).map((s) => (
-                  <div key={s.id} className="flex items-center gap-3 rounded-lg border bg-card p-3 text-sm">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground shrink-0">
+                  <div key={s.id} className="flex items-center gap-3 rounded-xl border bg-card p-3 text-sm transition-colors hover:bg-muted/20">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted/70 text-muted-foreground shrink-0">
                       <Users className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -217,7 +217,7 @@ export function TeacherDashboardClient({ data }: { data: TeacherDashboardData })
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -258,15 +258,15 @@ export function TeacherDashboardClient({ data }: { data: TeacherDashboardData })
           { label: "Profile", href: "/teacher/profile", icon: Users },
         ].map((item) => (
           <Link key={item.href} href={item.href}>
-            <div className="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50 cursor-pointer">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:text-foreground transition-colors">
+            <div className="group flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/70 text-muted-foreground group-hover:text-foreground transition-colors">
                 <item.icon className="h-5 w-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{item.label}</p>
                 <p className="text-xs text-muted-foreground">Quick action</p>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              <ArrowRight className="h-4 w-4 text-muted-foreground/60 shrink-0" />
             </div>
           </Link>
         ))}

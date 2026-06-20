@@ -23,8 +23,8 @@ export function GreetingHeader({ name, avatarUrl, role, subtitle, badgeText }: G
   const greet = greetingText()
 
   return (
-    <div className="flex items-center gap-4 px-1">
-      <Avatar className="h-12 w-12 border">
+    <div className="flex items-center gap-4 rounded-xl border bg-card p-4 shadow-sm">
+      <Avatar className="h-12 w-12 ring-2 ring-border">
         <AvatarImage src={avatarUrl ?? undefined} alt={name} />
         <AvatarFallback className="bg-muted text-sm font-medium">{initials}</AvatarFallback>
       </Avatar>
