@@ -14,6 +14,11 @@ export async function GET(
 
   const { id } = await params
 
+  const profile = await prisma.profile.findUnique({
+    where: { userId: session.user.id },
+  })
+  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
+
   const { searchParams } = new URL(req.url)
   const includeLive = searchParams.get("include") === "liveSession"
 
@@ -31,14 +36,10 @@ export async function GET(
   }
 
   if (
-    booking.studentId !== session.user.id &&
-    booking.teacherId !== session.user.id
+    booking.studentId !== profile.id &&
+    booking.teacherId !== profile.id
   ) {
-    const profile = await prisma.profile.findUnique({
-      where: { userId: session.user.id },
-      select: { role: true },
-    })
-    if (profile?.role !== "admin") {
+    if (profile.role !== "admin") {
       return NextResponse.json({ error: "Not your booking" }, { status: 403 })
     }
   }
