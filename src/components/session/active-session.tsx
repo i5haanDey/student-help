@@ -12,7 +12,6 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX, Wifi, WifiOff, ChevronDown } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 
 interface ActiveSessionProps {
@@ -87,7 +86,6 @@ export function ActiveSession({
   const secs = remaining % 60
 
   const progressColor = progress > 0.3 ? "bg-primary" : progress > 0.1 ? "bg-amber-500" : "bg-destructive"
-  const progressBarColor = progress > 0.3 ? "from-primary to-primary/60" : progress > 0.1 ? "from-amber-500 to-amber-500/60" : "from-destructive to-destructive/60"
 
   useEffect(() => {
     if (isTeacherAnswer && extensionStatus === "pending" && !lastExtensionNotifRef.current) {
@@ -137,16 +135,16 @@ export function ActiveSession({
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-gradient-to-b from-background to-background/95">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-background">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b bg-background/90 backdrop-blur-md shrink-0">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b bg-background shrink-0">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className={`p-1.5 rounded-lg ${isLiveKitConnected ? "bg-primary/10" : "bg-destructive/10"}`}>
+            <div className="p-1.5 rounded-lg bg-muted">
               {isLiveKitConnected ? (
-                <Wifi className="h-4 w-4 text-primary" />
+                <Wifi className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <WifiOff className="h-4 w-4 text-destructive animate-pulse" />
+                <WifiOff className="h-4 w-4 text-destructive" />
               )}
             </div>
             <div>
@@ -167,56 +165,48 @@ export function ActiveSession({
             onMouseEnter={() => setShowTimerDetail(true)}
             onMouseLeave={() => setShowTimerDetail(false)}
           >
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 backdrop-blur-sm">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50">
               <Clock className={`h-4 w-4 ${remaining < 600 ? "text-destructive" : "text-muted-foreground"}`} />
               <span className={`font-mono text-base font-bold tabular-nums ${
-                remaining < 300 ? "text-destructive animate-pulse" :
+                remaining < 300 ? "text-destructive" :
                 remaining < 600 ? "text-amber-500" : "text-foreground"
               }`}>
                 {String(minutes).padStart(2, "0")}:{String(secs).padStart(2, "0")}
               </span>
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
             </div>
-            <AnimatePresence>
-              {showTimerDetail && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 5 }}
-                  className="absolute top-full mt-2 right-0 bg-popover border rounded-lg p-3 shadow-xl z-50 min-w-[220px]"
-                >
-                  <div className="space-y-2 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Scheduled</span>
-                      <span>{durationMinutes} min</span>
-                    </div>
-                    {extendedByMinutes > 0 && (
-                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-                        <span>Extended</span>
-                        <span>+{extendedByMinutes} min</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between font-medium border-t pt-1">
-                      <span>Total</span>
-                      <span>{durationMinutes + extendedByMinutes} min</span>
-                    </div>
-                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mt-2">
-                      <div
-                        className={`h-full rounded-full bg-gradient-to-r ${progressBarColor} transition-all duration-1000`}
-                        style={{ width: `${(1 - progress) * 100}%` }}
-                      />
-                    </div>
+            {showTimerDetail && (
+              <div className="absolute top-full mt-2 right-0 bg-popover border rounded-lg p-3 shadow-xl z-50 min-w-[220px]">
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Scheduled</span>
+                    <span>{durationMinutes} min</span>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  {extendedByMinutes > 0 && (
+                    <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                      <span>Extended</span>
+                      <span>+{extendedByMinutes} min</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-medium border-t pt-1">
+                    <span>Total</span>
+                    <span>{durationMinutes + extendedByMinutes} min</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                    <div
+                      className={`h-full rounded-full ${progressColor} transition-all duration-1000`}
+                      style={{ width: `${(1 - progress) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <Button
             variant="destructive"
             size="sm"
             onClick={() => setShowEndConfirm(true)}
-            className="shadow-lg shadow-destructive/10"
           >
             <LogOut className="h-4 w-4 mr-1" /> End
           </Button>
@@ -224,71 +214,62 @@ export function ActiveSession({
       </div>
 
       {/* Extension banner */}
-      <AnimatePresence>
-        {showExtensionBanner && isTeacherAnswer && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-b bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent"
-          >
-            <div className="px-4 py-3 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 text-sm min-w-0">
-                <div className="p-1.5 rounded-lg bg-amber-500/20 shrink-0">
-                  <Clock className="h-4 w-4 text-amber-500" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-medium truncate">
-                    <span className="text-amber-600 dark:text-amber-400">{otherName}</span> wants to extend
-                  </p>
-                  {extensionStatus === "pending" && (
-                    <p className="text-xs text-muted-foreground">Respond to their request</p>
-                  )}
-                </div>
+      {showExtensionBanner && isTeacherAnswer && (
+        <div className="overflow-hidden border-b bg-muted/50">
+          <div className="px-4 py-3 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-sm min-w-0">
+              <div className="p-1.5 rounded-lg bg-muted shrink-0">
+                <Clock className="h-4 w-4 text-muted-foreground" />
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
-                  onClick={async () => {
-                    setExtensionActionLoading(true)
-                    await onExtensionDeny()
-                    setExtensionActionLoading(false)
-                    setShowExtensionBanner(false)
-                  }}
-                  disabled={extensionActionLoading}
-                >
-                  <UserX className="h-3 w-3 mr-1" /> Deny
-                </Button>
-                <Button
-                  size="sm"
-                  className="shadow-lg shadow-primary/20"
-                  onClick={async () => {
-                    setExtensionActionLoading(true)
-                    await onExtensionAccept()
-                    setExtensionActionLoading(false)
-                    setShowExtensionBanner(false)
-                  }}
-                  disabled={extensionActionLoading}
-                >
-                  <UserCheck className="h-3 w-3 mr-1" /> Accept
-                </Button>
+              <div className="min-w-0">
+                <p className="font-medium truncate">
+                  {otherName} wants to extend
+                </p>
+                {extensionStatus === "pending" && (
+                  <p className="text-xs text-muted-foreground">Respond to their request</p>
+                )}
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  setExtensionActionLoading(true)
+                  await onExtensionDeny()
+                  setExtensionActionLoading(false)
+                  setShowExtensionBanner(false)
+                }}
+                disabled={extensionActionLoading}
+              >
+                <UserX className="h-3 w-3 mr-1" /> Deny
+              </Button>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  setExtensionActionLoading(true)
+                  await onExtensionAccept()
+                  setExtensionActionLoading(false)
+                  setShowExtensionBanner(false)
+                }}
+                disabled={extensionActionLoading}
+              >
+                <UserCheck className="h-3 w-3 mr-1" /> Accept
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
             <TabsList className="justify-start px-4 pt-2 border-b rounded-none bg-transparent gap-0 h-auto pb-0">
-              <TabsTrigger value="video" className="flex items-center gap-2 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
+              <TabsTrigger value="video" className="flex items-center gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
                 <Monitor className="h-4 w-4" /> Video
               </TabsTrigger>
-              <TabsTrigger value="whiteboard" className="flex items-center gap-2 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
+              <TabsTrigger value="whiteboard" className="flex items-center gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
                 <PenTool className="h-4 w-4" /> Whiteboard
               </TabsTrigger>
             </TabsList>
@@ -313,8 +294,8 @@ export function ActiveSession({
 
         {/* Desktop chat */}
         <div className="w-80 border-l hidden lg:flex flex-col bg-muted/10">
-          <div className="p-3 border-b bg-background/50 backdrop-blur-sm shrink-0 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-primary" />
+          <div className="p-3 border-b bg-background shrink-0 flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
             <h3 className="text-sm font-semibold">Chat</h3>
           </div>
           <div className="flex-1 overflow-hidden">
@@ -325,39 +306,31 @@ export function ActiveSession({
         {/* Mobile chat FAB */}
         <button
           onClick={() => setShowMobileChat(true)}
-          className="lg:hidden fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/30 flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95"
+          className="lg:hidden fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95"
           aria-label="Open chat"
         >
           <MessageSquare className="h-6 w-6" />
         </button>
 
         {/* Mobile chat drawer */}
-        <AnimatePresence>
-          {showMobileChat && (
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background"
-            >
-              <div className="flex items-center justify-between p-3 border-b bg-background/90 backdrop-blur-sm shrink-0">
-                <h3 className="text-sm font-semibold flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-primary" /> Chat
-                </h3>
-                <button
-                  onClick={() => setShowMobileChat(false)}
-                  className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <SessionChat sessionId={liveSessionId} profileId={profileId} otherName={otherName} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {showMobileChat && (
+          <div className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background">
+            <div className="flex items-center justify-between p-3 border-b bg-background shrink-0">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" /> Chat
+              </h3>
+              <button
+                onClick={() => setShowMobileChat(false)}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <SessionChat sessionId={liveSessionId} profileId={profileId} otherName={otherName} />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* End session confirmation */}

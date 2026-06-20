@@ -1,6 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Cell,
@@ -48,15 +47,9 @@ interface AdminDashboardData {
   topTeachers: TopTeacher[]
 }
 
-const stagger = {
-  animate: {
-    transition: { staggerChildren: 0.07 },
-  },
-}
-
 export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
   return (
-    <motion.div initial="initial" animate="animate" variants={stagger} className="space-y-6">
+    <div className="space-y-6">
       <GreetingHeader
         name="Admin"
         avatarUrl={null}
@@ -64,25 +57,19 @@ export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
         subtitle="Platform overview and management dashboard."
       />
 
-      <motion.div
-        variants={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }}
-        className="grid gap-4 grid-cols-2 lg:grid-cols-5"
-      >
-        <StatCard title="Total Users" value={data.totalUsers} icon={<Users className="h-5 w-5" />} color="chart-1" />
-        <StatCard title="Teachers" value={data.totalTeachers} icon={<UserCheck className="h-5 w-5" />} color="chart-4" />
-        <StatCard title="Students" value={data.totalStudents} icon={<Users className="h-5 w-5" />} color="chart-2" />
-        <StatCard title="Pending Verif." value={data.pendingVerifications} icon={<Clock className="h-5 w-5" />} color="chart-3" />
-        <StatCard title="Total Sessions" value={data.totalSessions} icon={<BookOpen className="h-5 w-5" />} color="chart-5" />
-      </motion.div>
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+        <StatCard label="Total Users" value={data.totalUsers} icon={<Users className="h-5 w-5" />} />
+        <StatCard label="Teachers" value={data.totalTeachers} icon={<UserCheck className="h-5 w-5" />} />
+        <StatCard label="Students" value={data.totalStudents} icon={<Users className="h-5 w-5" />} />
+        <StatCard label="Pending Verif." value={data.pendingVerifications} icon={<Clock className="h-5 w-5" />} />
+        <StatCard label="Total Sessions" value={data.totalSessions} icon={<BookOpen className="h-5 w-5" />} />
+      </div>
 
-      <motion.div
-        variants={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }}
-        className="grid gap-4 lg:grid-cols-2"
-      >
-        <Card className="overflow-hidden border-0 bg-gradient-to-br from-card to-muted/30 shadow-sm">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="h-4 w-4 text-[hsl(var(--chart-1))]" />
+              <Users className="h-4 w-4 text-muted-foreground" />
               User Growth
             </CardTitle>
             <CardDescription>Cumulative users and teachers over time</CardDescription>
@@ -119,10 +106,10 @@ export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden border-0 bg-gradient-to-br from-card to-muted/30 shadow-sm">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-[hsl(var(--chart-3))]" />
+              <ShieldCheck className="h-4 w-4 text-muted-foreground" />
               Teacher Verification Funnel
             </CardTitle>
             <CardDescription>Pending, approved, and rejected teachers</CardDescription>
@@ -151,16 +138,13 @@ export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
             )}
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }}
-        className="grid gap-4 lg:grid-cols-2"
-      >
-        <Card className="overflow-hidden border-0 bg-gradient-to-br from-card to-muted/30 shadow-sm">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-[hsl(var(--chart-2))]" />
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
               Session Volume
             </CardTitle>
             <CardDescription>Sessions per day (last 14 days)</CardDescription>
@@ -186,10 +170,10 @@ export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden border-0 bg-gradient-to-br from-card to-muted/30 shadow-sm">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-[hsl(var(--chart-5))]" />
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
               Top Teachers
             </CardTitle>
             <CardDescription>Teachers with the most completed sessions</CardDescription>
@@ -203,15 +187,16 @@ export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
             ) : (
               <div className="space-y-3">
                 {data.topTeachers.map((t, i) => (
-                  <div key={t.name} className="flex items-center gap-3 rounded-lg border bg-card/50 p-3 text-sm">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0`}
+                  <div key={t.name} className="flex items-center gap-3 rounded-lg border bg-card p-3 text-sm">
+                    <div
+                      className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shrink-0"
                       style={{ backgroundColor: `hsl(var(--chart-${(i % 5) + 1}))` }}
                     >
                       {i + 1}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.sessions} sessions · {t.rating.toFixed(1)} rating</p>
+                      <p className="text-xs text-muted-foreground">{t.sessions} sessions &middot; {t.rating.toFixed(1)} rating</p>
                     </div>
                     <div className="text-xs text-muted-foreground whitespace-nowrap">
                       <div className="h-2 w-16 rounded-full bg-muted overflow-hidden">
@@ -227,25 +212,18 @@ export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
             )}
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }}
-        className="grid gap-3 grid-cols-2 md:grid-cols-4"
-      >
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {[
-          { label: "Review Teachers", href: "/admin/teachers", desc: "Approve or reject", icon: ShieldCheck, color: "chart-3" },
-          { label: "View Sessions", href: "/admin/sessions", desc: "Monitor activity", icon: BookOpen, color: "chart-1" },
-          { label: "Disputes", href: "/admin/disputes", desc: `Active: ${data.disputedSessions}`, icon: AlertTriangle, color: "chart-5" },
-          { label: "Users", href: "/admin/users", desc: "Manage accounts", icon: Users, color: "chart-4" },
+          { label: "Review Teachers", href: "/admin/teachers", desc: "Approve or reject", icon: ShieldCheck },
+          { label: "View Sessions", href: "/admin/sessions", desc: "Monitor activity", icon: BookOpen },
+          { label: "Disputes", href: "/admin/disputes", desc: `Active: ${data.disputedSessions}`, icon: AlertTriangle },
+          { label: "Users", href: "/admin/users", desc: "Manage accounts", icon: Users },
         ].map((item) => (
           <Link key={item.href} href={item.href}>
-            <motion.div
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md cursor-pointer"
-            >
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg shrink-0 bg-[hsl(var(--${item.color})_/_0.12)] text-[hsl(var(--${item.color}))]`}>
+            <div className="group flex items-center gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50 cursor-pointer">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
                 <item.icon className="h-5 w-5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -253,10 +231,10 @@ export function AdminDashboardClient({ data }: { data: AdminDashboardData }) {
                 <p className="text-xs text-muted-foreground truncate">{item.desc}</p>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-            </motion.div>
+            </div>
           </Link>
         ))}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }
