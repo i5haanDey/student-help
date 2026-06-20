@@ -88,6 +88,19 @@ export interface LiveSession {
   startedAt: string | null
   endedAt: string | null
   aiSummaryStatus: string
+  teacherJoinedAt: string | null
+  studentJoinedAt: string | null
+  actualStartAt: string | null
+  extendedByMinutes: number | null
+  graceEndedAt: string | null
+  teacherDurationMs: number | null
+  studentDurationMs: number | null
+  admittedAt: string | null
+  disconnectedAt: string | null
+  extensionStatus: string | null
+  extensionRequestedBy: string | null
+  extensionRequestedMin: number | null
+  extensionExpiresAt: string | null
 }
 
 export interface PracticeSet {
@@ -128,4 +141,45 @@ export interface AppNotification {
   type: string | null
   isRead: boolean
   createdAt: string
+}
+
+export interface SessionStatusData {
+  phase: "waiting_for_teacher" | "waiting_for_admit" | "admitted" | "active" | "disconnected" | "post"
+  teacherJoined: boolean
+  studentJoined: boolean
+  admitted: boolean
+  actualStartAt: string | null
+  remainingSeconds: number
+  graceRemainingSeconds: number
+  graceExpired: boolean
+  disconnectedAt: string | null
+  extensionStatus: string | null
+  extensionRequestedBy: string | null
+  extensionRequestedMin: number | null
+  extensionExpiresAt: string | null
+}
+
+export interface SessionDetails {
+  booking: {
+    id: string
+    subject: string
+    sessionType: string
+    durationMinutes: number
+    status: string
+    amountInr: number | null
+    startsAt: string | null
+    createdAt: string
+    student: { id: string; displayName: string; avatarUrl: string | null }
+    teacher: { id: string; displayName: string; avatarUrl: string | null }
+  }
+  liveSession: LiveSession | null
+  chatMessages: {
+    id: string
+    senderId: string
+    messageText: string
+    createdAt: string
+  }[]
+  practiceSet: PracticeSet | null
+  rating: Rating | null
+  totalActualDuration: number
 }

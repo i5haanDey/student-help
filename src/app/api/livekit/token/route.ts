@@ -21,6 +21,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing roomName" }, { status: 400 })
     }
 
+    const bookingId = roomName.replace("room_", "")
+    if (!bookingId || bookingId === roomName) {
+      return NextResponse.json({ error: "Invalid room name" }, { status: 400 })
+    }
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { studentId: true, teacherId: true },
+    })
+
+    if (!booking) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 })
+    }
+
+    if (profile.id !== booking.studentId && profile.id !== booking.teacherId && profile.role !== "admin") {
+      return NextResponse.json({ error: "Not authorized to join this session" }, { status: 403 })
+    }
+
     const apiKey = process.env.LIVEKIT_API_KEY
     const apiSecret = process.env.LIVEKIT_API_SECRET
     const livekitUrl = process.env.LIVEKIT_URL

@@ -7,7 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SessionWhiteboard } from "@/components/session/session-whiteboard"
 import { SessionChat } from "@/components/session/session-chat"
 import { Button } from "@/components/ui/button"
-import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX } from "lucide-react"
+import { toast } from "sonner"
 
 interface ActiveSessionProps {
   liveSessionId: string
@@ -20,6 +29,13 @@ interface ActiveSessionProps {
   role: "student" | "teacher"
   otherName: string
   onEnd: () => void
+  durationMinutes: number
+  extendedByMinutes: number
+  remainingSeconds: number
+  extensionStatus: string | null
+  isTeacherAnswer: boolean
+  onExtensionAccept: () => Promise<void>
+  onExtensionDeny: () => Promise<void>
 }
 
 export function ActiveSession({
@@ -29,19 +45,55 @@ export function ActiveSession({
   profileId,
   otherName,
   onEnd,
+  durationMinutes,
+  extendedByMinutes,
+  remainingSeconds: initialRemaining,
+  extensionStatus,
+  isTeacherAnswer,
+  onExtensionAccept,
+  onExtensionDeny,
 }: ActiveSessionProps) {
   const [activeTab, setActiveTab] = useState("video")
   const [isEnding, setIsEnding] = useState(false)
   const [showMobileChat, setShowMobileChat] = useState(false)
-  const [elapsed, setElapsed] = useState(0)
-  const startTime = useRef(Date.now())
+  const [remaining, setRemaining] = useState(initialRemaining)
+  const [showExtensionBanner, setShowExtensionBanner] = useState(false)
+  const [extensionActionLoading, setExtensionActionLoading] = useState(false)
+  const [isLiveKitConnected, setIsLiveKitConnected] = useState(true)
+  const lastExtensionNotifRef = useRef(false)
+  const disconnectPostedRef = useRef(false)
 
   useEffect(() => {
+    setRemaining(initialRemaining)
+  }, [initialRemaining])
+
+  useEffect(() => {
+    if (remaining <= 0) {
+      onEnd()
+      return
+    }
     const interval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startTime.current) / 1000))
+      setRemaining((prev) => Math.max(0, prev - 1))
     }, 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [remaining, onEnd])
+
+  const totalSeconds = (durationMinutes + (extendedByMinutes ?? 0)) * 60
+  const progress = totalSeconds > 0 ? remaining / totalSeconds : 1
+  const progressColor = progress > 0.25 ? "bg-primary" : progress > 0.1 ? "bg-amber-500" : "bg-destructive"
+
+  const minutes = Math.floor(remaining / 60)
+  const secs = remaining % 60
+
+  useEffect(() => {
+    if (isTeacherAnswer && extensionStatus === "pending" && !lastExtensionNotifRef.current) {
+      lastExtensionNotifRef.current = true
+      setShowExtensionBanner(true)
+    }
+    if (extensionStatus === "accepted" || extensionStatus === "denied") {
+      setShowExtensionBanner(false)
+    }
+  }, [extensionStatus, isTeacherAnswer])
 
   async function handleEndSession() {
     setIsEnding(true)
@@ -58,8 +110,12 @@ export function ActiveSession({
         }
       }
 
-      await fetch(`/api/sessions/${liveSessionId}/end`, { method: "POST" })
+      if (!disconnectPostedRef.current) {
+        await fetch(`/api/sessions/${liveSessionId}/disconnect`, { method: "POST" })
+        disconnectPostedRef.current = true
+      }
 
+      await fetch(`/api/sessions/${liveSessionId}/end`, { method: "POST" })
       onEnd()
     } catch {
       onEnd()
@@ -68,22 +124,88 @@ export function ActiveSession({
     }
   }
 
+  function handleDisconnected() {
+    setIsLiveKitConnected(false)
+    if (!disconnectPostedRef.current) {
+      fetch(`/api/sessions/${liveSessionId}/disconnect`, { method: "POST" })
+      disconnectPostedRef.current = true
+    }
+    toast.info("Disconnected from session. Refreshing to reconnect...")
+  }
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       <div className="flex items-center justify-between px-4 py-2 border-b bg-background/80 backdrop-blur-sm shrink-0">
         <div className="flex items-center gap-3">
           <Monitor className="h-5 w-5 text-primary" />
           <span className="font-semibold text-sm">Live Session</span>
-          <span className="text-xs text-muted-foreground font-mono tabular-nums flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {String(Math.floor(elapsed / 60)).padStart(2, "0")}:{String(elapsed % 60).padStart(2, "0")}
-          </span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 text-xs font-mono tabular-nums">
+              <Clock className="h-3 w-3" />
+              <span className={remaining < 600 ? "text-destructive font-bold" : "text-muted-foreground"}>
+                {String(minutes).padStart(2, "0")}:{String(secs).padStart(2, "0")}
+              </span>
+            </div>
+            <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden hidden sm:block">
+              <div
+                className={`h-full ${progressColor} rounded-full transition-all duration-1000`}
+                style={{ width: `${progress * 100}%` }}
+              />
+            </div>
+          </div>
+          {!isLiveKitConnected && (
+            <span className="text-xs text-destructive flex items-center gap-1">
+              <Loader2 className="h-3 w-3 animate-spin" /> Reconnecting...
+            </span>
+          )}
         </div>
         <Button variant="destructive" size="sm" onClick={handleEndSession} disabled={isEnding}>
           {isEnding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LogOut className="h-4 w-4 mr-2" />}
           End Session
         </Button>
       </div>
+
+      {showExtensionBanner && isTeacherAnswer && (
+        <div className="px-4 py-3 border-b bg-amber-500/10 border-amber-500/20">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-amber-500" />
+              <span>
+                <strong>{otherName}</strong> wants to extend the session
+                {extensionStatus === "pending" && " — Respond to their request"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-destructive text-destructive hover:bg-destructive/10"
+                onClick={async () => {
+                  setExtensionActionLoading(true)
+                  await onExtensionDeny()
+                  setExtensionActionLoading(false)
+                  setShowExtensionBanner(false)
+                }}
+                disabled={extensionActionLoading}
+              >
+                <UserX className="h-3 w-3 mr-1" /> Deny
+              </Button>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  setExtensionActionLoading(true)
+                  await onExtensionAccept()
+                  setExtensionActionLoading(false)
+                  setShowExtensionBanner(false)
+                }}
+                disabled={extensionActionLoading}
+              >
+                <UserCheck className="h-3 w-3 mr-1" /> Accept
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
@@ -102,7 +224,7 @@ export function ActiveSession({
                 token={token}
                 serverUrl={livekitUrl}
                 connect={true}
-                onDisconnected={() => {}}
+                onDisconnected={handleDisconnected}
                 className="flex-1"
               >
                 <VideoConference />
@@ -115,7 +237,6 @@ export function ActiveSession({
           </Tabs>
         </div>
 
-        {/* Desktop chat sidebar */}
         <div className="w-80 border-l hidden lg:flex flex-col">
           <div className="p-3 border-b bg-muted/30 shrink-0">
             <h3 className="text-sm font-semibold flex items-center gap-2">
@@ -127,7 +248,6 @@ export function ActiveSession({
           </div>
         </div>
 
-        {/* Mobile chat toggle button */}
         <button
           onClick={() => setShowMobileChat(true)}
           className="lg:hidden fixed bottom-4 right-4 z-40 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center"
@@ -136,7 +256,6 @@ export function ActiveSession({
           <MessageSquare className="h-5 w-5" />
         </button>
 
-        {/* Mobile chat drawer */}
         {showMobileChat && (
           <div className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background">
             <div className="flex items-center justify-between p-3 border-b shrink-0">

@@ -5,16 +5,17 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Loader2, Sparkles, ArrowLeft, CheckCircle, BookOpen, Star, Zap } from "lucide-react"
+import { Loader2, Sparkles, ArrowLeft, CheckCircle, BookOpen, Star, Zap, Eye } from "lucide-react"
 import { toast } from "sonner"
 
 interface PostSessionProps {
   liveSessionId: string
   role: "student" | "teacher"
   subject?: string
+  bookingId?: string
 }
 
-export function PostSession({ liveSessionId, role, subject }: PostSessionProps) {
+export function PostSession({ liveSessionId, role, subject, bookingId }: PostSessionProps) {
   const router = useRouter()
   const [isGenerating, setIsGenerating] = useState(true)
   const [summary, setSummary] = useState<string | null>(null)
@@ -163,6 +164,16 @@ export function PostSession({ liveSessionId, role, subject }: PostSessionProps) 
                 <Zap className="h-4 w-4 mr-2" />
               )}
               Generate Practice Questions
+            </Button>
+          )}
+
+          {!isGenerating && bookingId && (
+            <Button
+              variant="ghost"
+              className="w-full"
+              onClick={() => router.push(`/${role}/sessions/${bookingId}/details`)}
+            >
+              <Eye className="h-4 w-4 mr-2" /> View Full Session Details
             </Button>
           )}
 

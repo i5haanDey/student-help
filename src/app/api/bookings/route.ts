@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { auth } from "@/lib/auth"
+import type { Prisma } from "@/generated/prisma/client"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -15,10 +16,48 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url)
   const role = searchParams.get("role") ?? session.user.role
+  const scope = searchParams.get("scope")
 
-  const where = role === "teacher"
+  const whereBase: Prisma.BookingWhereInput = role === "teacher"
     ? { teacherId: profile.id }
     : { studentId: profile.id }
+
+  const now = new Date()
+
+  const expiredBookings = await prisma.booking.findMany({
+    where: {
+      ...whereBase,
+      startsAt: { not: null, lte: now },
+      status: { in: ["confirmed"] },
+    },
+    select: { id: true, startsAt: true, durationMinutes: true },
+  })
+
+  for (const b of expiredBookings) {
+    if (b.startsAt) {
+      const endTime = new Date(b.startsAt.getTime() + b.durationMinutes * 60000)
+      if (endTime < now) {
+        await prisma.booking.update({
+          where: { id: b.id },
+          data: { status: "completed", endedAt: now },
+        })
+      }
+    }
+  }
+
+  let where: Prisma.BookingWhereInput = whereBase
+
+  if (scope === "upcoming") {
+    where = {
+      ...whereBase,
+      status: { in: ["pending", "confirmed", "in_progress"] },
+    }
+  } else if (scope === "past") {
+    where = {
+      ...whereBase,
+      status: { in: ["completed", "cancelled", "disputed"] },
+    }
+  }
 
   const bookings = await prisma.booking.findMany({
     where,
@@ -26,7 +65,7 @@ export async function GET(req: Request) {
       student: { select: { id: true, displayName: true, avatarUrl: true } },
       teacher: { select: { id: true, displayName: true, avatarUrl: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: scope === "past" ? { createdAt: "desc" } : { startsAt: { sort: "asc", nulls: "last" } },
   })
 
   return NextResponse.json(bookings.map((b) => ({
@@ -67,6 +106,8 @@ export async function POST(req: Request) {
     const platformFeeInr = Math.round(amountInr * 0.1 * 100) / 100
     const teacherPayoutInr = Math.round((amountInr - platformFeeInr) * 100) / 100
 
+    const parsedStartsAt = startsAt ? new Date(startsAt) : null
+
     const booking = await prisma.booking.create({
       data: {
         studentId: profile.id,
@@ -78,10 +119,17 @@ export async function POST(req: Request) {
         amountInr,
         platformFeeInr,
         teacherPayoutInr,
-        startsAt: startsAt ? new Date(startsAt) : null,
+        startsAt: parsedStartsAt,
         status: "pending",
       },
     })
+
+    if (parsedStartsAt) {
+      await prisma.liveSession.updateMany({
+        where: { bookingId: booking.id },
+        data: { graceEndedAt: new Date(parsedStartsAt.getTime() + 15 * 60000) },
+      })
+    }
 
     await prisma.notification.create({
       data: {

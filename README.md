@@ -21,8 +21,11 @@ An ed-tech platform connecting students with AI doubt-solving and live teacher s
 - **AI Doubt Solver** — Text + image input with confidence-labeled AI responses and 5 Explain Modes (Simple, Visual, Analogy, Step-by-Step, Exam-Oriented)
 - **Teacher On Demand** — Browse verified teachers, check availability, book instant or scheduled sessions
 - **Live Classroom** — Video sessions via LiveKit with tldraw whiteboard and in-session chat
+- **Session Lifecycle** — Teacher joins → admits student → timer starts when both present. 15 min grace period, auto-cancel + refund on no-show, disconnect handling with proportional teacher pay
+- **Extension Requests** — Student requests extension at 10-min mark (10/20/30/Custom). First 10 min free, rest paid. Teacher accepts/denies with 3 min auto-deny timeout
 - **AI Practice Generator** — 3-tier practice sets (Easy/Medium/Advanced) generated post-session
 - **Mastery Tracking** — Per-subject mastery scores with radial chart visualization
+- **Session History** — Two-section layout: Upcoming/Ongoing + History with full session details (summary, chat, whiteboard, practice, rating)
 - **Role Dashboards** — Dedicated views for Students, Teachers, and Admins
 - **Admin Panel** — Teacher verification queue, user/session/dispute management
 - **PWA** — Installable on mobile home screen (add from browser menu)
@@ -35,6 +38,9 @@ npm install
 
 # Generate Prisma client
 npx prisma generate
+
+# Push schema to database
+npx prisma db push
 
 # Start dev server
 npm run dev
@@ -83,13 +89,13 @@ src/
 ├── app/              # Next.js App Router
 │   ├── (auth)/       # Login, register, onboarding
 │   ├── (dashboard)/  # Student / Teacher / Admin dashboards
-│   └── api/          # 14 REST route handler groups
+│   └── api/          # 22 REST route handler groups
 ├── components/       # React components by domain
 │   ├── ui/           # shadcn/ui primitives
 │   ├── auth/         # Login, register, onboarding forms
 │   ├── dashboard/    # Role-specific dashboards
 │   ├── doubt/        # AI doubt solver
-│   ├── session/      # Live classroom (lobby, active, post)
+│   ├── session/      # Live classroom (lobby, admit, active, post, details)
 │   ├── teacher/      # Search, profile, availability
 │   ├── booking/      # Booking flow, sessions list
 │   ├── practice/     # Practice session UI
@@ -116,15 +122,21 @@ All routes check `auth()` and return 401/403 for unauthorized requests.
 | `/api/teachers/[id]` | GET | Teacher profile |
 | `/api/teachers/availability` | GET/POST/DELETE | Slot management |
 | `/api/teachers/verify` | POST | Submit verification docs |
-| `/api/bookings` | GET/POST | Booking CRUD |
+| `/api/bookings` | GET/POST | Booking CRUD with `?scope=upcoming\|past` |
 | `/api/bookings/[id]` | GET/PATCH | Booking detail |
 | `/api/payments` | POST | Mock payment |
-| `/api/livekit/token` | POST | LiveKit JWT token |
-| `/api/sessions/[id]` | PATCH | Live session |
-| `/api/sessions/[id]/chat` | GET/POST | Chat messages |
+| `/api/payments/refund` | POST | Mock refund (no-show) |
+| `/api/livekit/token` | POST | LiveKit JWT token (3rd-party enforcement) |
+| `/api/sessions/[id]` | PATCH | Live session updates |
+| `/api/sessions/[id]/join` | POST | Record participant join (enforces admit gate) |
+| `/api/sessions/[id]/admit` | POST | Teacher admits student |
+| `/api/sessions/[id]/disconnect` | POST | Track disconnect/reconnect |
+| `/api/sessions/[id]/extend` | POST/PATCH | Student requests / teacher responds |
+| `/api/sessions/[id]/end` | POST | End session (proportional pay) |
+| `/api/sessions/[id]/details` | GET | Full session details for history |
+| `/api/sessions/[id]/check-status` | GET | Poll lobby/active state |
 | `/api/sessions/[id]/chat` | GET/POST | Chat messages |
 | `/api/sessions/[id]/whiteboard` | GET/PUT | tldraw snapshots |
-| `/api/sessions/[id]/end` | POST | End session |
 | `/api/sessions/[id]/summary` | POST | AI session summary |
 | `/api/practice` | POST | Generate practice sets |
 | `/api/practice/[id]/attempt` | POST | Submit answer |
@@ -151,3 +163,15 @@ Additional project docs are in the parent directory:
 - `STUDENT_HELP_PRD_AI_v1.0.md` — Product Requirements Document
 - `STUDENT_HELP_TECHDOC_AI_v1.0.md` — Technical Architecture Document
 - `STUDENT_HELP_USERFLOW_AI_v1.0.md` — User Flow Document
+
+## Session Lifecycle
+
+```
+Booking confirmed (payment done) → Lobby → Teacher joins → Admits student →
+Student joins → Timer starts → Extension (student requests → teacher accepts/denies) →
+Disconnect handling (5 min rejoin window) → Session ends → History
+```
+
+- **Grace period**: 15 min after scheduled start. Teacher no-show → full refund + alternative teachers. Student no-show → no refund.
+- **Extension**: First 10 min free, remaining at teacher's hourly rate. Only one extension per session.
+- **Disconnect**: Timer pauses, 5 min to reconnect. Proportional teacher pay for time served.

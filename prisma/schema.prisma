@@ -135,6 +135,7 @@ model Profile {
   compositeScore    Decimal?            @default(0) @db.Decimal(5, 2) @map("composite_score")
   totalSessions     Int                 @default(0) @map("total_sessions")
   rank              String              @default("verified")
+  reliabilityScore  Int?                @default(100) @map("reliability_score")
   earningsTotal     Decimal?            @default(0) @db.Decimal(12, 2) @map("earnings_total")
   earningsPending   Decimal?            @default(0) @db.Decimal(12, 2) @map("earnings_pending")
 
@@ -193,16 +194,31 @@ model Booking {
 }
 
 model LiveSession {
-  id              String   @id @default(cuid())
-  bookingId       String   @unique @map("booking_id")
-  roomName        String?  @map("room_name")
-  recordingUrl    String?  @map("recording_url")
-  transcriptText  String?  @map("transcript_text")
-  summaryText     String?  @map("summary_text")
-  whiteboardState Json?    @default("{}") @map("whiteboard_state")
-  startedAt       DateTime? @map("started_at")
-  endedAt         DateTime? @map("ended_at")
-  aiSummaryStatus String   @default("pending") @map("ai_summary_status")
+  id              String      @id @default(cuid())
+  bookingId       String      @unique @map("booking_id")
+  roomName        String?     @map("room_name")
+  recordingUrl    String?     @map("recording_url")
+  transcriptText  String?     @map("transcript_text")
+  summaryText     String?     @map("summary_text")
+  whiteboardState Json?       @default("{}") @map("whiteboard_state")
+  startedAt       DateTime?   @map("started_at")
+  endedAt         DateTime?   @map("ended_at")
+  aiSummaryStatus String      @default("pending") @map("ai_summary_status")
+
+  teacherJoinedAt   DateTime? @map("teacher_joined_at")
+  studentJoinedAt   DateTime? @map("student_joined_at")
+  actualStartAt     DateTime? @map("actual_start_at")
+  extendedByMinutes Int?      @default(0) @map("extended_by_minutes")
+  graceEndedAt      DateTime? @map("grace_ended_at")
+  teacherDurationMs Int?      @default(0) @map("teacher_duration_ms")
+  studentDurationMs Int?      @default(0) @map("student_duration_ms")
+  admittedAt        DateTime? @map("admitted_at")
+  disconnectedAt    DateTime? @map("disconnected_at")
+
+  extensionRequestedBy String? @map("extension_requested_by")
+  extensionRequestedMin Int?   @default(0) @map("extension_requested_min")
+  extensionStatus     String?  @default("none") @map("extension_status")
+  extensionExpiresAt  DateTime? @map("extension_expires_at")
 
   booking      Booking              @relation(fields: [bookingId], references: [id])
   chatMessages SessionChatMessage[]
