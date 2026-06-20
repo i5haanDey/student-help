@@ -43,13 +43,17 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
       try {
         const res = await fetch(`/api/bookings/${bookingId}?include=liveSession`)
         const bookingData = await res.json()
+        if (!res.ok || !bookingData?.teacher || !bookingData?.student) {
+          setData(null)
+          return
+        }
         setData(bookingData)
 
         if (bookingData.status === "completed") {
           setPhase("post")
         }
       } catch {
-        // error handled below
+        setData(null)
       } finally {
         setIsLoading(false)
       }
