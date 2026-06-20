@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Video, VideoOff, Mic, MicOff, Monitor } from "lucide-react"
+import { toast } from "sonner"
 
 interface SessionLobbyProps {
   bookingId: string
@@ -23,7 +24,8 @@ export function SessionLobby({ bookingId, subject, teacherName, studentName, rol
     setIsJoining(true)
     try {
       await onJoin()
-    } catch {
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to join session")
       setIsJoining(false)
     }
   }

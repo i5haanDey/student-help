@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { SessionLobby } from "@/components/session/session-lobby"
 import { ActiveSession } from "@/components/session/active-session"
 import { PostSession } from "@/components/session/post-session"
+import { toast } from "sonner"
 
 interface SessionData {
   id: string
@@ -58,7 +59,10 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
   }, [bookingId])
 
   async function handleJoin() {
-    if (!data?.liveSession?.roomName) return
+    if (!data?.liveSession?.roomName) {
+      toast.error("This session hasn't been set up yet. Complete payment first.")
+      return
+    }
 
     const tokenRes = await fetch("/api/livekit/token", {
       method: "POST",
