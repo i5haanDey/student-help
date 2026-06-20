@@ -7,15 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SessionWhiteboard } from "@/components/session/session-whiteboard"
 import { SessionChat } from "@/components/session/session-chat"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX } from "lucide-react"
+import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX, Wifi, WifiOff, ChevronDown } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 
 interface ActiveSessionProps {
@@ -40,9 +37,13 @@ interface ActiveSessionProps {
 
 export function ActiveSession({
   liveSessionId,
+  bookingId,
+  roomName,
   token,
   livekitUrl,
   profileId,
+  displayName,
+  role,
   otherName,
   onEnd,
   durationMinutes,
@@ -55,11 +56,13 @@ export function ActiveSession({
 }: ActiveSessionProps) {
   const [activeTab, setActiveTab] = useState("video")
   const [isEnding, setIsEnding] = useState(false)
+  const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [showMobileChat, setShowMobileChat] = useState(false)
   const [remaining, setRemaining] = useState(initialRemaining)
   const [showExtensionBanner, setShowExtensionBanner] = useState(false)
   const [extensionActionLoading, setExtensionActionLoading] = useState(false)
   const [isLiveKitConnected, setIsLiveKitConnected] = useState(true)
+  const [showTimerDetail, setShowTimerDetail] = useState(false)
   const lastExtensionNotifRef = useRef(false)
   const disconnectPostedRef = useRef(false)
 
@@ -80,10 +83,11 @@ export function ActiveSession({
 
   const totalSeconds = (durationMinutes + (extendedByMinutes ?? 0)) * 60
   const progress = totalSeconds > 0 ? remaining / totalSeconds : 1
-  const progressColor = progress > 0.25 ? "bg-primary" : progress > 0.1 ? "bg-amber-500" : "bg-destructive"
-
   const minutes = Math.floor(remaining / 60)
   const secs = remaining % 60
+
+  const progressColor = progress > 0.3 ? "bg-primary" : progress > 0.1 ? "bg-amber-500" : "bg-destructive"
+  const progressBarColor = progress > 0.3 ? "from-primary to-primary/60" : progress > 0.1 ? "from-amber-500 to-amber-500/60" : "from-destructive to-destructive/60"
 
   useEffect(() => {
     if (isTeacherAnswer && extensionStatus === "pending" && !lastExtensionNotifRef.current) {
@@ -97,6 +101,7 @@ export function ActiveSession({
 
   async function handleEndSession() {
     setIsEnding(true)
+    setShowEndConfirm(false)
     try {
       const saveSnapshot = (window as unknown as { __saveWhiteboardSnapshot?: () => Promise<unknown> }).__saveWhiteboardSnapshot
       if (saveSnapshot) {
@@ -109,12 +114,10 @@ export function ActiveSession({
           })
         }
       }
-
       if (!disconnectPostedRef.current) {
         await fetch(`/api/sessions/${liveSessionId}/disconnect`, { method: "POST" })
         disconnectPostedRef.current = true
       }
-
       await fetch(`/api/sessions/${liveSessionId}/end`, { method: "POST" })
       onEnd()
     } catch {
@@ -130,91 +133,162 @@ export function ActiveSession({
       fetch(`/api/sessions/${liveSessionId}/disconnect`, { method: "POST" })
       disconnectPostedRef.current = true
     }
-    toast.info("Disconnected from session. Refreshing to reconnect...")
+    toast.error("Connection lost. Trying to reconnect...")
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]">
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-background/80 backdrop-blur-sm shrink-0">
+    <div className="flex flex-col h-[calc(100vh-4rem)] bg-gradient-to-b from-background to-background/95">
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b bg-background/90 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
-          <Monitor className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-sm">Live Session</span>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs font-mono tabular-nums">
-              <Clock className="h-3 w-3" />
-              <span className={remaining < 600 ? "text-destructive font-bold" : "text-muted-foreground"}>
+            <div className={`p-1.5 rounded-lg ${isLiveKitConnected ? "bg-primary/10" : "bg-destructive/10"}`}>
+              {isLiveKitConnected ? (
+                <Wifi className="h-4 w-4 text-primary" />
+              ) : (
+                <WifiOff className="h-4 w-4 text-destructive animate-pulse" />
+              )}
+            </div>
+            <div>
+              <span className="font-semibold text-sm">Live Session</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-muted-foreground">{otherName}</span>
+                {!isLiveKitConnected && (
+                  <Badge variant="destructive" className="text-[8px] px-1 py-0 h-4">Disconnected</Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div
+            className="relative cursor-pointer"
+            onMouseEnter={() => setShowTimerDetail(true)}
+            onMouseLeave={() => setShowTimerDetail(false)}
+          >
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 backdrop-blur-sm">
+              <Clock className={`h-4 w-4 ${remaining < 600 ? "text-destructive" : "text-muted-foreground"}`} />
+              <span className={`font-mono text-base font-bold tabular-nums ${
+                remaining < 300 ? "text-destructive animate-pulse" :
+                remaining < 600 ? "text-amber-500" : "text-foreground"
+              }`}>
                 {String(minutes).padStart(2, "0")}:{String(secs).padStart(2, "0")}
               </span>
+              <ChevronDown className="h-3 w-3 text-muted-foreground" />
             </div>
-            <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden hidden sm:block">
-              <div
-                className={`h-full ${progressColor} rounded-full transition-all duration-1000`}
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
+            <AnimatePresence>
+              {showTimerDetail && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 5 }}
+                  className="absolute top-full mt-2 right-0 bg-popover border rounded-lg p-3 shadow-xl z-50 min-w-[220px]"
+                >
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Scheduled</span>
+                      <span>{durationMinutes} min</span>
+                    </div>
+                    {extendedByMinutes > 0 && (
+                      <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                        <span>Extended</span>
+                        <span>+{extendedByMinutes} min</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-medium border-t pt-1">
+                      <span>Total</span>
+                      <span>{durationMinutes + extendedByMinutes} min</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${progressBarColor} transition-all duration-1000`}
+                        style={{ width: `${(1 - progress) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-          {!isLiveKitConnected && (
-            <span className="text-xs text-destructive flex items-center gap-1">
-              <Loader2 className="h-3 w-3 animate-spin" /> Reconnecting...
-            </span>
-          )}
+
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setShowEndConfirm(true)}
+            className="shadow-lg shadow-destructive/10"
+          >
+            <LogOut className="h-4 w-4 mr-1" /> End
+          </Button>
         </div>
-        <Button variant="destructive" size="sm" onClick={handleEndSession} disabled={isEnding}>
-          {isEnding ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <LogOut className="h-4 w-4 mr-2" />}
-          End Session
-        </Button>
       </div>
 
-      {showExtensionBanner && isTeacherAnswer && (
-        <div className="px-4 py-3 border-b bg-amber-500/10 border-amber-500/20">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-amber-500" />
-              <span>
-                <strong>{otherName}</strong> wants to extend the session
-                {extensionStatus === "pending" && " — Respond to their request"}
-              </span>
+      {/* Extension banner */}
+      <AnimatePresence>
+        {showExtensionBanner && isTeacherAnswer && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-b bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent"
+          >
+            <div className="px-4 py-3 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 text-sm min-w-0">
+                <div className="p-1.5 rounded-lg bg-amber-500/20 shrink-0">
+                  <Clock className="h-4 w-4 text-amber-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-medium truncate">
+                    <span className="text-amber-600 dark:text-amber-400">{otherName}</span> wants to extend
+                  </p>
+                  {extensionStatus === "pending" && (
+                    <p className="text-xs text-muted-foreground">Respond to their request</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                  onClick={async () => {
+                    setExtensionActionLoading(true)
+                    await onExtensionDeny()
+                    setExtensionActionLoading(false)
+                    setShowExtensionBanner(false)
+                  }}
+                  disabled={extensionActionLoading}
+                >
+                  <UserX className="h-3 w-3 mr-1" /> Deny
+                </Button>
+                <Button
+                  size="sm"
+                  className="shadow-lg shadow-primary/20"
+                  onClick={async () => {
+                    setExtensionActionLoading(true)
+                    await onExtensionAccept()
+                    setExtensionActionLoading(false)
+                    setShowExtensionBanner(false)
+                  }}
+                  disabled={extensionActionLoading}
+                >
+                  <UserCheck className="h-3 w-3 mr-1" /> Accept
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-destructive text-destructive hover:bg-destructive/10"
-                onClick={async () => {
-                  setExtensionActionLoading(true)
-                  await onExtensionDeny()
-                  setExtensionActionLoading(false)
-                  setShowExtensionBanner(false)
-                }}
-                disabled={extensionActionLoading}
-              >
-                <UserX className="h-3 w-3 mr-1" /> Deny
-              </Button>
-              <Button
-                size="sm"
-                onClick={async () => {
-                  setExtensionActionLoading(true)
-                  await onExtensionAccept()
-                  setExtensionActionLoading(false)
-                  setShowExtensionBanner(false)
-                }}
-                disabled={extensionActionLoading}
-              >
-                <UserCheck className="h-3 w-3 mr-1" /> Accept
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="justify-start px-4 pt-2 border-b rounded-none bg-transparent gap-0 h-auto">
-              <TabsTrigger value="video" className="flex items-center gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none border-b-2 border-transparent">
+            <TabsList className="justify-start px-4 pt-2 border-b rounded-none bg-transparent gap-0 h-auto pb-0">
+              <TabsTrigger value="video" className="flex items-center gap-2 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
                 <Monitor className="h-4 w-4" /> Video
               </TabsTrigger>
-              <TabsTrigger value="whiteboard" className="flex items-center gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none border-b-2 border-transparent">
+              <TabsTrigger value="whiteboard" className="flex items-center gap-2 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
                 <PenTool className="h-4 w-4" /> Whiteboard
               </TabsTrigger>
             </TabsList>
@@ -237,45 +311,74 @@ export function ActiveSession({
           </Tabs>
         </div>
 
-        <div className="w-80 border-l hidden lg:flex flex-col">
-          <div className="p-3 border-b bg-muted/30 shrink-0">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" /> Chat
-            </h3>
+        {/* Desktop chat */}
+        <div className="w-80 border-l hidden lg:flex flex-col bg-muted/10">
+          <div className="p-3 border-b bg-background/50 backdrop-blur-sm shrink-0 flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold">Chat</h3>
           </div>
           <div className="flex-1 overflow-hidden">
             <SessionChat sessionId={liveSessionId} profileId={profileId} otherName={otherName} />
           </div>
         </div>
 
+        {/* Mobile chat FAB */}
         <button
           onClick={() => setShowMobileChat(true)}
-          className="lg:hidden fixed bottom-4 right-4 z-40 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center"
+          className="lg:hidden fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/30 flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95"
           aria-label="Open chat"
         >
-          <MessageSquare className="h-5 w-5" />
+          <MessageSquare className="h-6 w-6" />
         </button>
 
-        {showMobileChat && (
-          <div className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background">
-            <div className="flex items-center justify-between p-3 border-b shrink-0">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" /> Chat
-              </h3>
-              <button
-                onClick={() => setShowMobileChat(false)}
-                className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-muted"
-                aria-label="Close chat"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <SessionChat sessionId={liveSessionId} profileId={profileId} otherName={otherName} />
-            </div>
-          </div>
-        )}
+        {/* Mobile chat drawer */}
+        <AnimatePresence>
+          {showMobileChat && (
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="lg:hidden fixed inset-0 z-50 flex flex-col bg-background"
+            >
+              <div className="flex items-center justify-between p-3 border-b bg-background/90 backdrop-blur-sm shrink-0">
+                <h3 className="text-sm font-semibold flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-primary" /> Chat
+                </h3>
+                <button
+                  onClick={() => setShowMobileChat(false)}
+                  className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-muted transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <SessionChat sessionId={liveSessionId} profileId={profileId} otherName={otherName} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
+      {/* End session confirmation */}
+      <Dialog open={showEndConfirm} onOpenChange={setShowEndConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>End Session?</DialogTitle>
+            <DialogDescription>
+              The whiteboard will be saved and the session summary will be generated.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowEndConfirm(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleEndSession} disabled={isEnding}>
+              {isEnding ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Ending...</> : "End Session"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
