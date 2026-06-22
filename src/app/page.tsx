@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 import { MagneticButton } from "@/components/motion/magnetic-button-awwwards"
 import { TextReveal } from "@/components/motion/text-reveal"
-import { SmoothScroll } from "@/components/motion/smooth-scroll"
+
 
 const ease = [0.76, 0, 0.24, 1] as const
 
@@ -51,7 +51,7 @@ function HeroSection() {
   const { w } = useWindowSize()
   const [showContent, setShowContent] = useState(false)
   const [gradPos, setGradPos] = useState(50)
-  const isTouchDevice = typeof navigator !== "undefined" && (("ontouchstart" in (typeof window !== "undefined" ? window : {})) || navigator.maxTouchPoints > 0)
+  const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
 
   useEffect(() => {
     const t = setTimeout(() => setShowContent(true), 200)
@@ -306,7 +306,7 @@ function BentoSection() {
 
 /* ─── 4. AI DEMO SPLIT SCREEN ─── */
 function DemoSplitSection() {
-  const isTouchDevice = typeof navigator !== "undefined" && (("ontouchstart" in (typeof window !== "undefined" ? window : {})) || navigator.maxTouchPoints > 0)
+  const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
   const steps = [
     { label: "Ask a doubt", desc: 'What is the derivative of x²?', color: "#6366f1" },
     { label: "AI analyzes", desc: "Detecting: Calculus / Power Rule", color: "#8b5cf6" },
@@ -694,7 +694,7 @@ function AccordionSection() {
 /* ─── 8. MEGA FOOTER ─── */
 function MegaFooter() {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
-  const [isTouch] = useState(() => typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0))
+  const [isTouch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches)
   const mouse = useMousePosition()
   const linkItems = [
     { label: "Features", href: "#" },
@@ -775,7 +775,6 @@ function MegaFooter() {
 /* ─── ASSEMBLE ─── */
 export default function HomePage() {
   return (
-    <SmoothScroll>
     <div className="bg-[#0a0a0a] overflow-x-hidden">
       <header className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
         <div className="mx-auto flex h-16 items-center justify-between px-6 max-w-7xl">
@@ -799,6 +798,5 @@ export default function HomePage() {
       <AccordionSection />
       <MegaFooter />
     </div>
-    </SmoothScroll>
   )
 }
