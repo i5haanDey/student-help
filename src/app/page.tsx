@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useRef, useEffect, useState, useCallback } from "react"
 import Link from "next/link"
@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { MagneticButton } from "@/components/motion/magnetic-button-awwwards"
 import { TextReveal } from "@/components/motion/text-reveal"
+import { SmoothScroll } from "@/components/motion/smooth-scroll"
 
 const ease = [0.76, 0, 0.24, 1] as const
 
@@ -42,7 +43,7 @@ function useWindowSize() {
   return size
 }
 
-/* ΓöÇΓöÇΓöÇ 1. HERO ΓöÇΓöÇΓöÇ */
+/* ─── 1. HERO ─── */
 const GRADIENT_COLORS = ["#6366f1", "#8b5cf6", "#a78bfa", "#6366f1"]
 
 function HeroSection() {
@@ -150,15 +151,15 @@ function HeroSection() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ 2. MARQUEE ΓöÇΓöÇΓöÇ */
+/* ─── 2. MARQUEE ─── */
 function MarqueeSection() {
   const items = [
-    "Γ£ª AI DOUBT SOLVING",
-    "Γ£ª EXPERT TUTORS",
-    "Γ£ª 24/7 LEARNING",
-    "Γ£ª MASTERY TRACKING",
-    "Γ£ª LIVE SESSIONS",
-    "Γ£ª PRACTICE GENERATOR",
+    "✦ AI DOUBT SOLVING",
+    "✦ EXPERT TUTORS",
+    "✦ 24/7 LEARNING",
+    "✦ MASTERY TRACKING",
+    "✦ LIVE SESSIONS",
+    "✦ PRACTICE GENERATOR",
   ]
   return (
     <section className="relative overflow-hidden border-y border-white/5 bg-[#0c0c0c] py-6 -mt-px">
@@ -182,7 +183,7 @@ function MarqueeSection() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ 3. BENTO FEATURES ΓöÇΓöÇΓöÇ */
+/* ─── 3. BENTO FEATURES ─── */
 const featuresBento = [
   {
     icon: Brain,
@@ -292,15 +293,15 @@ function BentoSection() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ 4. AI DEMO SPLIT SCREEN ΓöÇΓöÇΓöÇ */
+/* ─── 4. AI DEMO SPLIT SCREEN ─── */
 function DemoSplitSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] })
   const steps = [
-    { label: "Ask a doubt", desc: 'What is the derivative of x┬▓?', color: "#6366f1" },
+    { label: "Ask a doubt", desc: 'What is the derivative of x²?', color: "#6366f1" },
     { label: "AI analyzes", desc: "Detecting: Calculus / Power Rule", color: "#8b5cf6" },
-    { label: "Step-by-step", desc: "d/dx [x┬▓] = 2┬╖x┬╣ = 2x", color: "#a78bfa" },
-    { label: "Confidence", desc: "High ΓÇö 96% certainty", color: "#22c55e" },
+    { label: "Step-by-step", desc: "d/dx [x²] = 2·x¹ = 2x", color: "#a78bfa" },
+    { label: "Confidence", desc: "High — 96% certainty", color: "#22c55e" },
   ]
   const activeStep = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [0, 0, 1, 2, 3])
   const stepOpacity0 = useTransform(activeStep, (v) => (v >= 0 ? 1 : 0.2))
@@ -316,7 +317,7 @@ function DemoSplitSection() {
     <section ref={containerRef} className="relative bg-[#0a0a0a] min-h-[300vh]">
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-full">
-          {/* Left ΓÇö pinned text */}
+          {/* Left — pinned text */}
           <div className="flex items-center justify-center px-8 lg:px-16">
             <div>
               <TextReveal
@@ -324,7 +325,7 @@ function DemoSplitSection() {
                 className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white mb-6"
               />
               <p className="text-white/30 text-sm leading-relaxed max-w-md uppercase tracking-wider">
-                Type a question or snap a picture. Our AI explains it in five different ways ΓÇö Simple, Visual, Analogy, Step-by-Step, or Exam-Oriented.
+                Type a question or snap a picture. Our AI explains it in five different ways — Simple, Visual, Analogy, Step-by-Step, or Exam-Oriented.
               </p>
               <div className="mt-8 space-y-4">
                 {steps.map((s, i) => (
@@ -349,7 +350,7 @@ function DemoSplitSection() {
               </div>
             </div>
           </div>
-          {/* Right ΓÇö mock UI */}
+          {/* Right — mock UI */}
           <div className="flex items-center justify-center px-8 lg:px-16">
             <motion.div
               className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-6 shadow-2xl"
@@ -374,7 +375,7 @@ function DemoSplitSection() {
                   style={{ opacity: mockOpacity0 }}
                 >
                   <p className="text-sm text-white/60">
-                    <span className="text-white font-medium">Q:</span> What is the derivative of x┬▓?
+                    <span className="text-white font-medium">Q:</span> What is the derivative of x²?
                   </p>
                 </motion.div>
                 <motion.div
@@ -383,10 +384,10 @@ function DemoSplitSection() {
                   style={{ opacity: mockOpacity2 }}
                 >
                   <p className="text-sm text-white/80">
-                    The derivative of <span className="text-indigo-400 font-mono">x┬▓</span> is{" "}
+                    The derivative of <span className="text-indigo-400 font-mono">x²</span> is{" "}
                     <span className="text-indigo-400 font-mono font-bold">2x</span>.
-                    Power rule: <span className="font-mono">d/dx [xΓü┐] = n┬╖xΓü┐Γü╗┬╣</span>.
-                    Here n=2, so 2┬╖x┬╣ = 2x.
+                    Power rule: <span className="font-mono">d/dx [xⁿ] = n·xⁿ⁻¹</span>.
+                    Here n=2, so 2·x¹ = 2x.
                   </p>
                 </motion.div>
                 <motion.div
@@ -412,14 +413,14 @@ function DemoSplitSection() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ 5. HORIZONTAL TEACHERS ROSTER ΓöÇΓöÇΓöÇ */
+/* ─── 5. HORIZONTAL TEACHERS ROSTER ─── */
 const teachers = [
-  { name: "Sarah Kapoor", subject: "Mathematics", rate: "Γé╣500/hr", rating: 4.9, initials: "SK", color: "#6366f1" },
-  { name: "Rohan Mehta", subject: "Physics", rate: "Γé╣600/hr", rating: 4.8, initials: "RM", color: "#8b5cf6" },
-  { name: "Priya Sharma", subject: "Chemistry", rate: "Γé╣450/hr", rating: 4.9, initials: "PS", color: "#a78bfa" },
-  { name: "Arun Kumar", subject: "Biology", rate: "Γé╣550/hr", rating: 4.7, initials: "AK", color: "#c084fc" },
-  { name: "Neha Gupta", subject: "English", rate: "Γé╣400/hr", rating: 4.9, initials: "NG", color: "#818cf8" },
-  { name: "Vikram Singh", subject: "History", rate: "Γé╣350/hr", rating: 4.6, initials: "VS", color: "#6366f1" },
+  { name: "Sarah Kapoor", subject: "Mathematics", rate: "₹500/hr", rating: 4.9, initials: "SK", color: "#6366f1" },
+  { name: "Rohan Mehta", subject: "Physics", rate: "₹600/hr", rating: 4.8, initials: "RM", color: "#8b5cf6" },
+  { name: "Priya Sharma", subject: "Chemistry", rate: "₹450/hr", rating: 4.9, initials: "PS", color: "#a78bfa" },
+  { name: "Arun Kumar", subject: "Biology", rate: "₹550/hr", rating: 4.7, initials: "AK", color: "#c084fc" },
+  { name: "Neha Gupta", subject: "English", rate: "₹400/hr", rating: 4.9, initials: "NG", color: "#818cf8" },
+  { name: "Vikram Singh", subject: "History", rate: "₹350/hr", rating: 4.6, initials: "VS", color: "#6366f1" },
 ]
 
 function HorizontalRoster() {
@@ -475,7 +476,7 @@ function HorizontalRoster() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ 6. MASTERY VISUALIZATION ΓöÇΓöÇΓöÇ */
+/* ─── 6. MASTERY VISUALIZATION ─── */
 function MasteryVizSection() {
   const subjects = [
     { name: "Algebra", score: 85 },
@@ -577,13 +578,13 @@ function MasteryVizSection() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ 7. FAQ ACCORDION ΓöÇΓöÇΓöÇ */
+/* ─── 7. FAQ ACCORDION ─── */
 const faqs = [
   { q: "How does the AI doubt solver work?", a: "Type or upload an image of your doubt. Our AI analyzes it and provides a detailed explanation with confidence scoring. You can choose from 5 explain modes for the same answer." },
   { q: "Are the teachers verified?", a: "Yes. All teachers go through a strict verification process including ID checks, credential validation, and a demo session before they can start teaching." },
   { q: "How do live sessions work?", a: "Book a slot with any verified teacher. You'll get a LiveKit-powered video room with whiteboard, chat, and screen sharing. Sessions are recorded for later review." },
   { q: "What is mastery tracking?", a: "After each session and practice set, your scores are updated per subject. Visual charts show your progress and highlight areas needing improvement." },
-  { q: "Is there a free tier?", a: "Yes. AI doubt solving is free. Live sessions with teachers are paid ΓÇö you only pay for the time you book." },
+  { q: "Is there a free tier?", a: "Yes. AI doubt solving is free. Live sessions with teachers are paid — you only pay for the time you book." },
 ]
 
 function AccordionSection() {
@@ -643,7 +644,7 @@ function AccordionSection() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ 8. MEGA FOOTER ΓöÇΓöÇΓöÇ */
+/* ─── 8. MEGA FOOTER ─── */
 function MegaFooter() {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
   const mouse = useMousePosition()
@@ -723,10 +724,11 @@ function MegaFooter() {
   )
 }
 
-/* ΓöÇΓöÇΓöÇ ASSEMBLE ΓöÇΓöÇΓöÇ */
+/* ─── ASSEMBLE ─── */
 export default function HomePage() {
   return (
-    <div className="bg-[#0a0a0a] overflow-x-hidden">
+    <SmoothScroll>
+    <div className="bg-[#0a0a0a]">
       <header className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
         <div className="mx-auto flex h-16 items-center justify-between px-6 max-w-7xl">
           <Link href="/" className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-widest">
@@ -749,5 +751,6 @@ export default function HomePage() {
       <AccordionSection />
       <MegaFooter />
     </div>
+    </SmoothScroll>
   )
 }
