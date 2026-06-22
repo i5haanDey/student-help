@@ -1,7 +1,6 @@
-import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
-export default auth(() => {
+export function middleware() {
   const response = NextResponse.next()
 
   response.headers.set(
@@ -23,7 +22,7 @@ export default auth(() => {
   response.headers.set("X-XSS-Protection", "1; mode=block")
 
   return response
-})
+}
 
 export const config = {
   matcher: [
