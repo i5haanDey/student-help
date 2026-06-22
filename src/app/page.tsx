@@ -306,6 +306,81 @@ function BentoSection() {
 
 /* ─── 4. AI DEMO SPLIT SCREEN ─── */
 function DemoSplitSection() {
+  const isTouchDevice = typeof navigator !== "undefined" && (("ontouchstart" in (typeof window !== "undefined" ? window : {})) || navigator.maxTouchPoints > 0)
+  const steps = [
+    { label: "Ask a doubt", desc: 'What is the derivative of x²?', color: "#6366f1" },
+    { label: "AI analyzes", desc: "Detecting: Calculus / Power Rule", color: "#8b5cf6" },
+    { label: "Step-by-step", desc: "d/dx [x²] = 2·x¹ = 2x", color: "#a78bfa" },
+    { label: "Confidence", desc: "High — 96% certainty", color: "#22c55e" },
+  ]
+
+  if (isTouchDevice) {
+    return (
+      <section className="relative bg-[#0a0a0a] py-20 px-6 overflow-hidden">
+        <div className="mx-auto max-w-6xl">
+          <TextReveal text="AI DOUBT SOLVER" className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white mb-4" />
+          <p className="text-white/30 text-sm leading-relaxed max-w-lg mb-10 uppercase tracking-wider">
+            Type a question or snap a picture. Our AI explains it in five different ways — Simple, Visual, Analogy, Step-by-Step, or Exam-Oriented.
+          </p>
+          <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-16">
+            <div className="w-full lg:w-1/2">
+              <div className="mt-8 space-y-4">
+                {steps.map((s, i) => (
+                  <motion.div key={i} className="flex items-center gap-4"
+                    initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
+                    transition={{ delay: i * 0.15, duration: 0.5, ease }}
+                  >
+                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                      style={{ backgroundColor: s.color + "33", color: s.color, border: `1px solid ${s.color}44` }}
+                    >{i + 1}</div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{s.label}</div>
+                      <div className="text-xs text-white/40">{s.desc}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            <div className="w-full lg:w-1/2 flex justify-center">
+              <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-6 shadow-2xl">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20">
+                    <Sparkles className="h-4 w-4 text-indigo-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">AI Doubt Solver</div>
+                    <div className="text-[11px] text-white/30">High Confidence</div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="rounded-2xl bg-white/[0.04] border border-white/5 p-4">
+                    <p className="text-sm text-white/60"><span className="text-white font-medium">Q:</span> What is the derivative of x²?</p>
+                  </div>
+                  <div className="rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-4">
+                    <p className="text-sm text-white/80">
+                      The derivative of <span className="text-indigo-400 font-mono">x²</span> is{" "}
+                      <span className="text-indigo-400 font-mono font-bold">2x</span>.
+                      Power rule: <span className="font-mono">d/dx [xⁿ] = n·xⁿ⁻¹</span>. Here n=2, so 2·x¹ = 2x.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {["Simple", "Analogy", "Visual", "Step-by-Step", "Exam"].map((m) => (
+                      <span key={m} className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-medium text-white/40">{m}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  return <DesktopDemo />
+}
+
+function DesktopDemo() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] })
   const steps = [
@@ -328,30 +403,18 @@ function DemoSplitSection() {
     <section ref={containerRef} className="relative bg-[#0a0a0a] min-h-[300vh]">
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-full">
-          {/* Left — pinned text */}
           <div className="flex items-center justify-center px-8 lg:px-16">
             <div>
-              <TextReveal
-                text="AI DOUBT SOLVER"
-                className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white mb-6"
-              />
+              <TextReveal text="AI DOUBT SOLVER" className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white mb-6" />
               <p className="text-white/30 text-sm leading-relaxed max-w-md uppercase tracking-wider">
                 Type a question or snap a picture. Our AI explains it in five different ways — Simple, Visual, Analogy, Step-by-Step, or Exam-Oriented.
               </p>
               <div className="mt-8 space-y-4">
                 {steps.map((s, i) => (
-                  <motion.div
-                    key={i}
-                    className="flex items-center gap-4"
-                    initial={{ opacity: 0.2 }}
-                    style={{ opacity: stepOpacities[i] }}
-                  >
-                    <div
-                      className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  <motion.div key={i} className="flex items-center gap-4" initial={{ opacity: 0.2 }} style={{ opacity: stepOpacities[i] }}>
+                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                       style={{ backgroundColor: s.color + "33", color: s.color, border: `1px solid ${s.color}44` }}
-                    >
-                      {i + 1}
-                    </div>
+                    >{i + 1}</div>
                     <div>
                       <div className="text-sm font-semibold text-white">{s.label}</div>
                       <div className="text-xs text-white/40">{s.desc}</div>
@@ -361,15 +424,8 @@ function DemoSplitSection() {
               </div>
             </div>
           </div>
-          {/* Right — mock UI */}
           <div className="flex items-center justify-center px-8 lg:px-16">
-            <motion.div
-              className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-6 shadow-2xl"
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease }}
-            >
+            <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-6 shadow-2xl">
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20">
                   <Sparkles className="h-4 w-4 text-indigo-400" />
@@ -380,43 +436,23 @@ function DemoSplitSection() {
                 </div>
               </div>
               <div className="space-y-4">
-                <motion.div
-                  className="rounded-2xl bg-white/[0.04] border border-white/5 p-4"
-                  initial={{ opacity: 0 }}
-                  style={{ opacity: mockOpacity0 }}
-                >
-                  <p className="text-sm text-white/60">
-                    <span className="text-white font-medium">Q:</span> What is the derivative of x²?
-                  </p>
+                <motion.div className="rounded-2xl bg-white/[0.04] border border-white/5 p-4" initial={{ opacity: 0 }} style={{ opacity: mockOpacity0 }}>
+                  <p className="text-sm text-white/60"><span className="text-white font-medium">Q:</span> What is the derivative of x²?</p>
                 </motion.div>
-                <motion.div
-                  className="rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  style={{ opacity: mockOpacity2 }}
-                >
+                <motion.div className="rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-4" initial={{ opacity: 0, y: 10 }} style={{ opacity: mockOpacity2 }}>
                   <p className="text-sm text-white/80">
                     The derivative of <span className="text-indigo-400 font-mono">x²</span> is{" "}
                     <span className="text-indigo-400 font-mono font-bold">2x</span>.
-                    Power rule: <span className="font-mono">d/dx [xⁿ] = n·xⁿ⁻¹</span>.
-                    Here n=2, so 2·x¹ = 2x.
+                    Power rule: <span className="font-mono">d/dx [xⁿ] = n·xⁿ⁻¹</span>. Here n=2, so 2·x¹ = 2x.
                   </p>
                 </motion.div>
-                <motion.div
-                  className="flex gap-2"
-                  initial={{ opacity: 0 }}
-                  style={{ opacity: mockOpacity3 }}
-                >
+                <motion.div className="flex gap-2" initial={{ opacity: 0 }} style={{ opacity: mockOpacity3 }}>
                   {["Simple", "Analogy", "Visual", "Step-by-Step", "Exam"].map((m) => (
-                    <span
-                      key={m}
-                      className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-medium text-white/40"
-                    >
-                      {m}
-                    </span>
+                    <span key={m} className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-medium text-white/40">{m}</span>
                   ))}
                 </motion.div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
