@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/components/providers"
 import { PwaRegister } from "@/components/pwa-register"
+import { ScrollProgressBar } from "@/components/layout/scroll-progress-bar"
+import { SmoothScroll } from "@/components/motion/smooth-scroll"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +17,12 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Student Help - Learn Smarter",
-  description: "AI-powered doubt solving, expert teacher sessions, and personalized learning.",
+  title: {
+    template: "%s — Student Help",
+    default: "Student Help — Learn Smarter",
+  },
+  description:
+    "AI-powered doubt solving, expert teacher sessions, and personalized learning — all in one seamless platform.",
   manifest: "/manifest.webmanifest",
   icons: [
     { rel: "icon", url: "/icon.svg", type: "image/svg+xml" },
@@ -54,9 +60,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <Providers>
-          {children}
+          <SmoothScroll>
+            {children}
+          </SmoothScroll>
         </Providers>
         <PwaRegister />
+        <ScrollProgressBar />
       </body>
     </html>
   )

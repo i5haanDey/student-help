@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX, Wifi, WifiOff, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
+import { PatternBg } from "@/components/ui/pattern-bg"
 
 interface ActiveSessionProps {
   liveSessionId: string
@@ -335,8 +336,9 @@ export function ActiveSession({
 
       {/* End session confirmation */}
       <Dialog open={showEndConfirm} onOpenChange={setShowEndConfirm}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md overflow-hidden">
+          <PatternBg variant="dots" className="opacity-30" />
+          <DialogHeader className="relative">
             <DialogTitle>End Session?</DialogTitle>
             <DialogDescription>
               The whiteboard will be saved and the session summary will be generated.

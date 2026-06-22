@@ -3,8 +3,9 @@
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ImagePlus, X, Loader2, Send } from "lucide-react"
+import { ImagePlus, X, Loader2, Send, Mic } from "lucide-react"
 import Image from "next/image"
+import { PatternBg } from "@/components/ui/pattern-bg"
 
 interface DoubtInputProps {
   onSubmit: (text: string, file: File | null) => Promise<void>
@@ -16,6 +17,7 @@ export function DoubtInput({ onSubmit, isLoading }: DoubtInputProps) {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const dropRef = useRef<HTMLDivElement>(null)
 
@@ -63,23 +65,76 @@ export function DoubtInput({ onSubmit, isLoading }: DoubtInputProps) {
     clearFile()
   }
 
+  function handleVoice() {
+    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      return
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) return
+    const recognition = new SpeechRecognition()
+    recognition.lang = "en-US"
+    recognition.interimResults = true
+    setIsListening(true)
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results as SpeechRecognitionResult[])
+        .map((r) => r[0].transcript)
+        .join("")
+      setText((prev) => prev + transcript)
+    }
+    recognition.onend = () => setIsListening(false)
+    recognition.onerror = () => setIsListening(false)
+    recognition.start()
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div
         ref={dropRef}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
-        className={`relative transition-colors ${isDragging ? "ring-2 ring-primary rounded-lg" : ""}`}
+        className={`relative transition-colors ${isDragging ? "ring-2 ring-primary rounded-xl" : ""}`}
       >
-        <Textarea
-          placeholder="Type your doubt here... (e.g., 'What is the derivative of x²?')"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onPaste={handlePaste}
-          className="min-h-[120px] resize-none pr-12 text-base"
-          disabled={isLoading}
-        />
+        <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card/50">
+          <PatternBg variant="dots" className="opacity-30" />
+          <Textarea
+            placeholder="Type your doubt here... (e.g., 'What is the derivative of x²?')"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onPaste={handlePaste}
+            className="min-h-[120px] resize-none pr-20 text-base border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 relative"
+            disabled={isLoading}
+          />
+          <div className="absolute bottom-2 right-2 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleVoice}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200 ${
+                isListening
+                  ? "bg-destructive/10 text-destructive animate-pulse"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}
+              disabled={isLoading}
+              title="Voice input"
+            >
+              <Mic className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
+              onClick={() => fileRef.current?.click()}
+              disabled={isLoading}
+              title="Upload image"
+            >
+              <ImagePlus className="h-4 w-4" />
+            </button>
+          </div>
+          {isDragging && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-primary/5 border-2 border-dashed border-primary pointer-events-none z-10">
+              <p className="text-sm font-medium text-primary">Drop image here</p>
+            </div>
+          )}
+        </div>
         <input
           ref={fileRef}
           type="file"
@@ -87,21 +142,6 @@ export function DoubtInput({ onSubmit, isLoading }: DoubtInputProps) {
           className="hidden"
           onChange={handleFileSelect}
         />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
-          onClick={() => fileRef.current?.click()}
-          disabled={isLoading}
-        >
-          <ImagePlus className="h-5 w-5" />
-        </Button>
-        {isDragging && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-primary/5 border-2 border-dashed border-primary pointer-events-none">
-            <p className="text-sm font-medium text-primary">Drop image here</p>
-          </div>
-        )}
       </div>
 
       {preview && (
@@ -113,19 +153,17 @@ export function DoubtInput({ onSubmit, isLoading }: DoubtInputProps) {
             height={200}
             className="object-cover max-h-[200px]"
           />
-          <Button
+          <button
             type="button"
-            variant="destructive"
-            size="icon"
-            className="absolute top-1 right-1 h-6 w-6"
+            className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm border text-muted-foreground hover:text-foreground transition-colors"
             onClick={clearFile}
           >
             <X className="h-3 w-3" />
-          </Button>
+          </button>
         </div>
       )}
 
-      <Button type="submit" className="w-full" disabled={(!text.trim() && !file) || isLoading}>
+      <Button type="submit" className="w-full h-11 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300" disabled={(!text.trim() && !file) || isLoading}>
         {isLoading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin mr-2" />

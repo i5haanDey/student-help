@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, IndianRupee, Clock, Zap, CalendarDays } from "lucide-react"
 import { toast } from "sonner"
+import { PatternBg, CornerArc } from "@/components/ui/pattern-bg"
 
 const SUBJECTS = [
   "Mathematics", "Physics", "Chemistry", "Biology",
@@ -121,8 +122,10 @@ export function BookingForm() {
 
   if (showPayment && bookingId) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md mx-auto overflow-hidden">
+        <PatternBg variant="dots" className="opacity-30" />
+        <CornerArc className="top-0 right-0" size={120} />
+        <CardHeader className="text-center relative">
           <CardTitle className="text-2xl">Complete Payment</CardTitle>
           <CardDescription>Secure your session with one-time payment.</CardDescription>
         </CardHeader>
@@ -145,8 +148,10 @@ export function BookingForm() {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
+    <Card className="w-full max-w-2xl mx-auto overflow-hidden">
+      <PatternBg variant="crosshatch" className="opacity-25" />
+      <CornerArc className="top-0 right-0" size={140} />
+      <CardHeader className="relative">
         <CardTitle>Book a Session</CardTitle>
         <CardDescription>
           {teacher ? `Booking with ${teacher.displayName}` : "Fill in the details to book a session."}

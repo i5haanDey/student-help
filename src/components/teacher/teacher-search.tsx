@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, Search, Star, BookOpen, IndianRupee, Filter, X } from "lucide-react"
 import Link from "next/link"
+import { PatternBg, CornerArc } from "@/components/ui/pattern-bg"
 
 const SUBJECTS = [
   "All", "Mathematics", "Physics", "Chemistry", "Biology",
@@ -82,11 +83,15 @@ export function TeacherSearch() {
 
   return (
     <div className="space-y-8">
-      <div className="rounded-xl border bg-card p-8 shadow-sm">
-        <h1 className="text-3xl font-bold tracking-tight">Find a Teacher</h1>
-        <p className="text-muted-foreground mt-2 max-w-xl">
-          Connect with verified expert teachers for live 1-on-1 sessions. Search by subject, rate, or availability.
-        </p>
+      <div className="relative overflow-hidden rounded-xl border bg-card p-6 shadow-sm">
+        <PatternBg variant="grid" className="opacity-30" />
+        <CornerArc className="top-0 right-0" size={140} />
+        <div className="relative">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Find a Teacher</h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xl">
+            Connect with verified expert teachers for live 1-on-1 sessions. Search by subject, rate, or availability.
+          </p>
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -122,9 +127,10 @@ export function TeacherSearch() {
         </div>
 
         {showFilters && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
+          <Card className="overflow-hidden">
+            <PatternBg variant="dots" className="opacity-25" />
+            <CardContent className="pt-5 relative">
+              <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold flex items-center gap-2">
                   <Filter className="h-4 w-4" /> Filters
                 </h3>
@@ -174,19 +180,22 @@ export function TeacherSearch() {
           <p className="text-sm text-muted-foreground">Finding teachers...</p>
         </div>
       ) : teachers.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-5">
-            <BookOpen className="h-8 w-8 text-muted-foreground/50" />
+        <div className="relative overflow-hidden text-center py-20 rounded-xl border bg-card/50">
+          <PatternBg variant="crosshatch" className="opacity-30" />
+          <div className="relative">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-5">
+              <BookOpen className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No teachers found</h3>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto text-sm">
+              Try adjusting your filters or search terms to find available teachers.
+            </p>
+            {hasActiveFilters && (
+              <Button variant="outline" onClick={clearFilters}>
+                <X className="h-4 w-4 mr-2" /> Clear Filters
+              </Button>
+            )}
           </div>
-          <h3 className="text-lg font-semibold mb-2">No teachers found</h3>
-          <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-            Try adjusting your filters or search terms to find available teachers.
-          </p>
-          {hasActiveFilters && (
-            <Button variant="outline" onClick={clearFilters}>
-              <X className="h-4 w-4 mr-2" /> Clear Filters
-            </Button>
-          )}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -194,8 +203,10 @@ export function TeacherSearch() {
             const initials = getInitials(teacher.displayName)
             return (
               <Link key={teacher.id} href={`/student/teachers/${teacher.id}`}>
-                <Card className="group transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer h-full">
-                  <CardContent className="pt-6">
+                <Card className="group transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer h-full overflow-hidden">
+                  <PatternBg variant="dots" className="opacity-20 group-hover:opacity-30 transition-opacity" />
+                  <CornerArc className="top-0 right-0" size={80} />
+                  <CardContent className="pt-5 relative">
                     <div className="flex items-start gap-4">
                       <div className="relative shrink-0">
                         <Avatar className="h-14 w-14 ring-1 ring-border">
@@ -205,7 +216,7 @@ export function TeacherSearch() {
                           </AvatarFallback>
                         </Avatar>
                         {teacher.isAvailableNow && (
-                          <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-green-500 border-2 border-background" />
+                          <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-background" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0 space-y-2">

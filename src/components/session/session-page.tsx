@@ -10,6 +10,7 @@ import { PostSession } from "@/components/session/post-session"
 import { ExtensionModal } from "@/components/session/extension-modal"
 import { toast } from "sonner"
 import type { SessionStatusData } from "@/types"
+import { PatternBg } from "@/components/ui/pattern-bg"
 
 const POLL_INTERVAL = 3000
 const EXTENSION_TRIGGER_SECONDS = 11 * 60
@@ -222,16 +223,20 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading session...</p>
+        </div>
       </div>
     )
   }
 
   if (!data) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] gap-4">
-        <p className="text-muted-foreground">Session not found.</p>
-        <Button onClick={() => router.push(`/${role}/sessions`)}>
+      <div className="relative overflow-hidden flex flex-col items-center justify-center min-h-[80vh] gap-4 rounded-xl border bg-card/50 mx-4 p-8">
+        <PatternBg variant="crosshatch" className="opacity-30" />
+        <p className="text-muted-foreground relative">Session not found.</p>
+        <Button className="relative" onClick={() => router.push(`/${role}/sessions`)}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Sessions
         </Button>
       </div>
@@ -241,11 +246,12 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
   if (disconnectedOverlay) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center p-4">
-        <div className="w-full max-w-md text-center space-y-6">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10">
+        <div className="relative w-full max-w-md text-center space-y-6 overflow-hidden rounded-xl border bg-card p-8">
+          <PatternBg variant="crosshatch" className="opacity-30" />
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-destructive/10 relative">
             <WifiOff className="h-10 w-10 text-destructive" />
           </div>
-          <h2 className="text-2xl font-bold">Connection Lost</h2>
+          <h2 className="text-2xl font-bold relative">Connection Lost</h2>
           <p className="text-muted-foreground">
             You've been disconnected. The session will end if you don't reconnect within{" "}
             <span className="font-mono font-bold text-foreground">{disconnectTimer}</span> seconds.

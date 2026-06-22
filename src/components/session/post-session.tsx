@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator"
 import { Loader2, Sparkles, ArrowLeft, CheckCircle, BookOpen, Star, Zap, Eye } from "lucide-react"
 import { toast } from "sonner"
+import { PatternBg, CornerArc } from "@/components/ui/pattern-bg"
 
 interface PostSessionProps {
   liveSessionId: string
@@ -83,8 +84,10 @@ export function PostSession({ liveSessionId, role, subject, bookingId }: PostSes
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg mx-auto">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-lg mx-auto overflow-hidden">
+        <PatternBg variant="grid" className="opacity-30" />
+        <CornerArc className="top-0 right-0" size={140} />
+        <CardHeader className="text-center relative">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 mb-4">
             <CheckCircle className="h-8 w-8 text-emerald-500" />
           </div>

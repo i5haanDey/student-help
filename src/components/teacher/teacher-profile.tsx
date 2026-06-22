@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Loader2, Star, BookOpen, IndianRupee, Globe, Clock, Award, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import { PatternBg, CornerArc } from "@/components/ui/pattern-bg"
 
 interface TeacherDetail {
   id: string
@@ -58,11 +59,14 @@ export function TeacherProfileView() {
 
   if (!teacher) {
     return (
-      <div className="text-center py-20">
-        <p className="text-muted-foreground">Teacher not found.</p>
-        <Button asChild className="mt-4">
-          <Link href="/student/teachers">Browse Teachers</Link>
-        </Button>
+      <div className="relative overflow-hidden text-center py-20 rounded-xl border bg-card/50">
+        <PatternBg variant="crosshatch" className="opacity-30" />
+        <div className="relative">
+          <p className="text-muted-foreground">Teacher not found.</p>
+          <Button asChild className="mt-4">
+            <Link href="/student/teachers">Browse Teachers</Link>
+          </Button>
+        </div>
       </div>
     )
   }
@@ -73,23 +77,29 @@ export function TeacherProfileView() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Card>
-        <CardContent className="pt-8">
+      <Card className="overflow-hidden">
+        <PatternBg variant="grid" className="opacity-30" />
+        <CornerArc className="top-0 right-0" size={160} />
+        <CardContent className="pt-8 relative">
           <div className="flex flex-col sm:flex-row items-start gap-6">
-            <Avatar className="h-24 w-24">
+            <Avatar className="h-24 w-24 ring-2 ring-border ring-offset-2 ring-offset-background">
               <AvatarImage src={teacher.avatarUrl ?? ""} />
-              <AvatarFallback className="text-2xl">{teacher.displayName.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                {teacher.displayName.charAt(0)}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-3">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-2xl font-bold">{teacher.displayName}</h1>
                   {teacher.isAvailableNow && (
-                    <Badge variant="success">Available Now</Badge>
+                    <Badge variant="success" className="text-[10px]">Available Now</Badge>
                   )}
-                  <Badge variant="secondary">{teacher.rank}</Badge>
+                  {teacher.rank && teacher.rank !== "verified" && (
+                    <Badge variant="secondary" className="text-[10px]">{teacher.rank}</Badge>
+                  )}
                 </div>
-                <p className="text-muted-foreground mt-1">{teacher.bio}</p>
+                <p className="text-sm text-muted-foreground mt-1">{teacher.bio}</p>
               </div>
               <div className="flex items-center gap-4 text-sm flex-wrap">
                 <span className="flex items-center gap-1">
@@ -111,13 +121,14 @@ export function TeacherProfileView() {
       </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden">
+          <PatternBg variant="dots" className="opacity-25" />
+          <CardHeader className="relative">
             <CardTitle className="text-base flex items-center gap-2">
               <BookOpen className="h-4 w-4" /> Subjects
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="flex flex-wrap gap-2">
               {teacher.subjects.map((s) => (
                 <Badge key={s} variant="secondary">{s}</Badge>
@@ -126,13 +137,14 @@ export function TeacherProfileView() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden">
+          <PatternBg variant="crosshatch" className="opacity-25" />
+          <CardHeader className="relative">
             <CardTitle className="text-base flex items-center gap-2">
               <Globe className="h-4 w-4" /> Languages
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="flex flex-wrap gap-2">
               {teacher.teachingLanguages.map((l) => (
                 <Badge key={l} variant="secondary">{l}</Badge>
@@ -143,19 +155,20 @@ export function TeacherProfileView() {
       </div>
 
       {teacher.availabilitySlots.length > 0 && (
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden">
+          <PatternBg variant="grid" className="opacity-25" />
+          <CardHeader className="relative">
             <CardTitle className="text-base flex items-center gap-2">
               <Clock className="h-4 w-4" /> Available Slots
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="grid gap-2 sm:grid-cols-2">
               {teacher.availabilitySlots.slice(0, 6).map((slot) => {
                 const start = new Date(slot.slotStart)
                 const end = new Date(slot.slotEnd)
                 return (
-                  <div key={slot.id} className="flex items-center gap-3 p-3 rounded-lg border text-sm">
+                  <div key={slot.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card/50 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div>
                       <p className="font-medium">
@@ -175,13 +188,14 @@ export function TeacherProfileView() {
       )}
 
       {teacher.ratingsReceived.length > 0 && (
-        <Card>
-          <CardHeader>
+        <Card className="overflow-hidden">
+          <PatternBg variant="dots" className="opacity-25" />
+          <CardHeader className="relative">
             <CardTitle className="text-base flex items-center gap-2">
               <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> Reviews
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 relative">
             {teacher.ratingsReceived.slice(0, 5).map((r, i) => (
               <div key={i} className="space-y-1">
                 <div className="flex items-center gap-1">
@@ -201,7 +215,7 @@ export function TeacherProfileView() {
       )}
 
       <div className="flex gap-3">
-        <Button className="flex-1" asChild>
+        <Button className="flex-1 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300" asChild>
           <Link href={`/student/sessions/book?teacher=${teacher.id}`}>
             <MessageCircle className="h-4 w-4 mr-2" /> Book a Session
           </Link>

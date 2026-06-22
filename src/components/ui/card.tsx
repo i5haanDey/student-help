@@ -1,6 +1,9 @@
-import * as React from "react"
+"use client"
 
+import * as React from "react"
+import { motion, type HTMLMotionProps } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { cardHover, cardTap } from "@/lib/animations"
 
 const Card = React.forwardRef<
   HTMLDivElement,
@@ -9,7 +12,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow-sm",
+      "rounded-xl border bg-card text-card-foreground shadow-card transition-all duration-300",
       className
     )}
     {...props}
@@ -17,13 +20,31 @@ const Card = React.forwardRef<
 ))
 Card.displayName = "Card"
 
+const MotionCard = React.forwardRef<
+  HTMLDivElement,
+  HTMLMotionProps<"div">
+>(({ className, ...props }, ref) => (
+  <motion.div
+    ref={ref}
+    className={cn(
+      "rounded-xl border bg-card text-card-foreground shadow-card",
+      className
+    )}
+    whileHover={cardHover}
+    whileTap={cardTap}
+    transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+    {...props}
+  />
+))
+MotionCard.displayName = "MotionCard"
+
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    className={cn("flex flex-col space-y-1.5 px-6 pt-6 pb-4", className)}
     {...props}
   />
 ))
@@ -35,7 +56,10 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
+    className={cn(
+      "font-semibold leading-none tracking-tight text-base",
+      className
+    )}
     {...props}
   />
 ))
@@ -47,7 +71,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-muted-foreground/80", className)}
     {...props}
   />
 ))
@@ -73,4 +97,4 @@ const CardFooter = React.forwardRef<
 ))
 CardFooter.displayName = "CardFooter"
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+export { Card, MotionCard, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

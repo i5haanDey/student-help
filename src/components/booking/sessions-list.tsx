@@ -9,6 +9,7 @@ import { Loader2, Calendar, Clock, IndianRupee, Video, ArrowRight, Play, History
 import type { LucideIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PatternBg, CornerArc } from "@/components/ui/pattern-bg"
 
 interface Session {
   id: string
@@ -96,21 +97,24 @@ export function SessionsList({ role }: { role: "student" | "teacher" }) {
 
   if (upcoming.length === 0 && past.length === 0) {
     return (
-      <div className="text-center py-20">
-        <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-5">
-          <Video className="h-8 w-8 text-muted-foreground/50" />
+      <div className="relative overflow-hidden text-center py-20 rounded-xl border bg-card/50">
+        <PatternBg variant="crosshatch" className="opacity-30" />
+        <div className="relative">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-5">
+            <Video className="h-8 w-8 text-muted-foreground/50" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No sessions yet</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm mx-auto text-sm">
+            {role === "student"
+              ? "Find a teacher and book your first session to get started."
+              : "You haven't had any sessions yet. They'll appear here once students book with you."}
+          </p>
+          {role === "student" && (
+            <Button onClick={() => router.push("/student/teachers")}>
+              <BookOpen className="h-4 w-4 mr-2" /> Find a Teacher
+            </Button>
+          )}
         </div>
-        <h3 className="text-lg font-semibold mb-2">No sessions yet</h3>
-        <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-          {role === "student"
-            ? "Find a teacher and book your first session to get started."
-            : "You haven't had any sessions yet. They'll appear here once students book with you."}
-        </p>
-        {role === "student" && (
-          <Button onClick={() => router.push("/student/teachers")}>
-            <BookOpen className="h-4 w-4 mr-2" /> Find a Teacher
-          </Button>
-        )}
       </div>
     )
   }

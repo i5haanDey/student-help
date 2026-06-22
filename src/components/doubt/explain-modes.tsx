@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
 import { Loader2, Lightbulb, Image, GitBranch, ListChecks, Target } from "lucide-react"
+import { PatternBg } from "@/components/ui/pattern-bg"
 
 const modes = [
   { id: "simple", label: "Simple", icon: Lightbulb, description: "Plain and simple language" },
@@ -53,8 +54,8 @@ export function ExplainModes({ doubtText, onExplain }: ExplainModesProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-1.5">
         {modes.map((mode) => {
           const Icon = mode.icon
           const isActive = activeMode === mode.id
@@ -65,9 +66,9 @@ export function ExplainModes({ doubtText, onExplain }: ExplainModesProps) {
               size="sm"
               onClick={() => handleModeClick(mode.id)}
               disabled={isLoading}
-              className="flex items-center gap-1.5"
+              className="flex items-center gap-1.5 text-xs h-8"
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-3.5 w-3.5" />
               {mode.label}
             </Button>
           )
@@ -81,23 +82,24 @@ export function ExplainModes({ doubtText, onExplain }: ExplainModesProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="flex items-center justify-center py-8"
+            className="flex items-center justify-center py-6"
           >
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
           </motion.div>
         )}
         {content && !isLoading && (
           <motion.div
             key="content"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
           >
-            <Card>
-              <CardContent className="pt-4">
+            <Card className="overflow-hidden">
+              <PatternBg variant="dots" className="opacity-25" />
+              <CardContent className="pt-4 relative">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
                     {modes.find((m) => m.id === activeMode)?.label} Explanation
                   </span>
                 </div>

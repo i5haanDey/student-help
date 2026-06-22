@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Loader2, Video, VideoOff, Mic, MicOff, Monitor, UserCheck, UserX, Clock, AlertCircle, Shield, Users } from "lucide-react"
 import { GraceTimer } from "@/components/session/grace-timer"
 import { toast } from "sonner"
+import { PatternBg, CornerArc } from "@/components/ui/pattern-bg"
 
 interface SessionLobbyProps {
   bookingId: string
@@ -72,8 +73,9 @@ export function SessionLobby({
   if (graceExpired && role === "student") {
     return (
       <div className="w-full max-w-lg mx-auto">
-        <Card>
-          <CardHeader className="text-center">
+        <Card className="overflow-hidden">
+          <PatternBg variant="crosshatch" className="opacity-30" />
+          <CardHeader className="text-center relative">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 mb-5">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
@@ -103,8 +105,9 @@ export function SessionLobby({
   if (graceExpired && role === "teacher") {
     return (
       <div className="w-full max-w-lg mx-auto">
-        <Card>
-          <CardHeader className="text-center">
+        <Card className="overflow-hidden">
+          <PatternBg variant="crosshatch" className="opacity-30" />
+          <CardHeader className="text-center relative">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 mb-5">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
@@ -125,7 +128,9 @@ export function SessionLobby({
 
   return (
     <div className="w-full max-w-lg mx-auto">
-      <Card className="shadow-lg">
+      <Card className="shadow-lg overflow-hidden">
+        <PatternBg variant="grid" className="opacity-30" />
+        <CornerArc className="top-0 right-0" size={120} />
         <CardHeader className="text-center pb-4">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-5">
             {waitingForTeacher ? (

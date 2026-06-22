@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { AlertTriangle } from "lucide-react"
+import { PatternBg } from "@/components/ui/pattern-bg"
 import { useRouter } from "next/navigation"
 
 export default function DashboardError({
@@ -15,13 +16,14 @@ export default function DashboardError({
 
   return (
     <div className="flex-1 flex items-center justify-center py-20 p-4">
-      <div className="text-center space-y-4 max-w-md">
-        <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
-        <h2 className="text-xl font-semibold">Something went wrong</h2>
-        <p className="text-muted-foreground text-sm">
+      <div className="relative overflow-hidden text-center space-y-4 max-w-md rounded-xl border bg-card p-8">
+        <PatternBg variant="crosshatch" className="opacity-30" />
+        <AlertTriangle className="h-12 w-12 text-destructive mx-auto relative" />
+        <h2 className="text-xl font-semibold relative">Something went wrong</h2>
+        <p className="text-muted-foreground text-sm relative">
           {error.message || "An unexpected error occurred."}
         </p>
-        <div className="flex gap-3 justify-center">
+        <div className="flex gap-3 justify-center relative">
           <Button onClick={reset}>Try Again</Button>
           <Button variant="outline" onClick={() => router.back()}>
             Go Back

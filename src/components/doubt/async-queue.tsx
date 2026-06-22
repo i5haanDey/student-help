@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Clock, Loader2, RefreshCw, Trash2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
+import { PatternBg } from "@/components/ui/pattern-bg"
 
 interface QueueItem {
   id: string
@@ -58,8 +59,9 @@ export function AsyncQueue({ items, onRemove }: AsyncQueueProps) {
   if (items.length === 0) return null
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="overflow-hidden">
+      <PatternBg variant="dots" className="opacity-25" />
+      <CardHeader className="relative">
         <CardTitle className="text-lg flex items-center gap-2">
           <Clock className="h-5 w-5" />
           Async Doubt Queue
@@ -68,7 +70,7 @@ export function AsyncQueue({ items, onRemove }: AsyncQueueProps) {
           Your doubts are being processed. Results will appear here.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-3 relative">
         <AnimatePresence>
           {displayedItems.map((item) => (
             <motion.div

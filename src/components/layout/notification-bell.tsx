@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Bell, Loader2 } from "lucide-react"
+import { Bell, Loader2, CheckCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface Notification {
@@ -55,12 +56,26 @@ export function NotificationBell() {
     <Popover open={open} onOpenChange={(isOpen) => { setOpen(isOpen); if (isOpen) fetchNotifications() }}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
+          <motion.div
+            animate={unreadCount > 0 ? {
+              rotate: [0, -10, 10, -10, 0],
+            } : {}}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            <Bell className="h-5 w-5" />
+          </motion.div>
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground"
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
@@ -68,7 +83,7 @@ export function NotificationBell() {
           <span className="text-sm font-semibold">Notifications</span>
           {unreadCount > 0 && (
             <Button variant="ghost" size="sm" className="h-auto text-xs px-2 py-1" onClick={markAllRead} disabled={isLoading}>
-              {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Mark all read"}
+              {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <><CheckCheck className="h-3 w-3 mr-1" /> Mark all read</>}
             </Button>
           )}
         </div>
@@ -77,8 +92,11 @@ export function NotificationBell() {
             <p className="text-sm text-muted-foreground p-4 text-center">No notifications yet.</p>
           ) : (
             notifications.slice(0, 20).map((n) => (
-              <div
+              <motion.div
                 key={n.id}
+                initial={{ opacity: 0, x: -4 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.2 }}
                 className={cn(
                   "p-3 border-b last:border-0 text-sm transition-colors hover:bg-muted/50",
                   !n.isRead && "bg-primary/5"
@@ -94,7 +112,7 @@ export function NotificationBell() {
                     minute: "2-digit",
                   })}
                 </p>
-              </div>
+              </motion.div>
             ))
           )}
         </div>
