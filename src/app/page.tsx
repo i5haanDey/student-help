@@ -18,8 +18,6 @@ import {
 } from "lucide-react"
 import { MagneticButton } from "@/components/motion/magnetic-button-awwwards"
 import { TextReveal } from "@/components/motion/text-reveal"
-
-
 const ease = [0.76, 0, 0.24, 1] as const
 
 function useMousePosition() {
@@ -43,31 +41,20 @@ function useWindowSize() {
   return size
 }
 
-/* â”€â”€â”€ 1. HERO â”€â”€â”€ */
+/* GöÇGöÇGöÇ 1. HERO GöÇGöÇGöÇ */
 const GRADIENT_COLORS = ["#6366f1", "#8b5cf6", "#a78bfa", "#6366f1"]
 
 function HeroSection() {
   const mouse = useMousePosition()
   const { w } = useWindowSize()
   const [showContent, setShowContent] = useState(false)
-  const [gradPos, setGradPos] = useState(50)
-  const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
 
   useEffect(() => {
     const t = setTimeout(() => setShowContent(true), 200)
     return () => clearTimeout(t)
   }, [])
 
-  useEffect(() => {
-    if (isTouchDevice) {
-      const interval = setInterval(() => {
-        setGradPos((p) => (p + 1) % 200)
-      }, 50)
-      return () => clearInterval(interval)
-    }
-  }, [isTouchDevice])
-
-  const gradX = isTouchDevice ? gradPos : (mouse.x / w) * 100
+  const gradX = (mouse.x / w) * 100
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-[#0a0a0a]">
@@ -104,7 +91,7 @@ function HeroSection() {
 
           <h1
             className="relative font-black uppercase leading-[0.85] select-none"
-            style={{ fontSize: "clamp(2.5rem, 15vw, 10rem)", letterSpacing: "-0.04em" }}
+            style={{ fontSize: "clamp(3rem, 12vw, 10rem)", letterSpacing: "-0.04em" }}
           >
             <span
               className="bg-clip-text text-transparent"
@@ -162,19 +149,19 @@ function HeroSection() {
   )
 }
 
-/* â”€â”€â”€ 2. MARQUEE â”€â”€â”€ */
+/* GöÇGöÇGöÇ 2. MARQUEE GöÇGöÇGöÇ */
 function MarqueeSection() {
   const items = [
-    "âœ¦ AI DOUBT SOLVING",
-    "âœ¦ EXPERT TUTORS",
-    "âœ¦ 24/7 LEARNING",
-    "âœ¦ MASTERY TRACKING",
-    "âœ¦ LIVE SESSIONS",
-    "âœ¦ PRACTICE GENERATOR",
+    "G£ª AI DOUBT SOLVING",
+    "G£ª EXPERT TUTORS",
+    "G£ª 24/7 LEARNING",
+    "G£ª MASTERY TRACKING",
+    "G£ª LIVE SESSIONS",
+    "G£ª PRACTICE GENERATOR",
   ]
   return (
     <section className="relative overflow-hidden border-y border-white/5 bg-[#0c0c0c] py-6 -mt-px">
-      <div className="flex" style={{ transform: "rotate(-1.5deg) scale(1.05) translateX(-5%)" }}>
+      <div className="flex" style={{ transform: "rotate(-2deg) scale(1.05)" }}>
         <motion.div
           className="flex shrink-0 gap-12"
           animate={{ x: ["0%", "-50%"] }}
@@ -194,7 +181,7 @@ function MarqueeSection() {
   )
 }
 
-/* â”€â”€â”€ 3. BENTO FEATURES â”€â”€â”€ */
+/* GöÇGöÇGöÇ 3. BENTO FEATURES GöÇGöÇGöÇ */
 const featuresBento = [
   {
     icon: Brain,
@@ -205,7 +192,7 @@ const featuresBento = [
   {
     icon: Sparkles,
     title: "Explain Differently",
-    desc: "Five modes â€” Simple, Visual, Analogy, Step-by-Step, Exam-Oriented.",
+    desc: "Five modes GÇö Simple, Visual, Analogy, Step-by-Step, Exam-Oriented.",
     span: "md:col-span-1 md:row-span-1",
   },
   {
@@ -223,7 +210,7 @@ const featuresBento = [
   {
     icon: Zap,
     title: "Practice Generator",
-    desc: "Customized practice sets after every session â€” Easy, Medium, Advanced.",
+    desc: "Customized practice sets after every session GÇö Easy, Medium, Advanced.",
     span: "md:col-span-1 md:row-span-1",
   },
   {
@@ -304,90 +291,15 @@ function BentoSection() {
   )
 }
 
-/* â”€â”€â”€ 4. AI DEMO SPLIT SCREEN â”€â”€â”€ */
+/* GöÇGöÇGöÇ 4. AI DEMO SPLIT SCREEN GöÇGöÇGöÇ */
 function DemoSplitSection() {
-  const isTouchDevice = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches
-  const steps = [
-    { label: "Ask a doubt", desc: 'What is the derivative of xÂ²?', color: "#6366f1" },
-    { label: "AI analyzes", desc: "Detecting: Calculus / Power Rule", color: "#8b5cf6" },
-    { label: "Step-by-step", desc: "d/dx [xÂ²] = 2Â·xÂ¹ = 2x", color: "#a78bfa" },
-    { label: "Confidence", desc: "High â€” 96% certainty", color: "#22c55e" },
-  ]
-
-  if (isTouchDevice) {
-    return (
-      <section className="relative bg-[#0a0a0a] py-20 px-6 overflow-hidden">
-        <div className="mx-auto max-w-6xl">
-          <TextReveal text="AI DOUBT SOLVER" className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white mb-4" />
-          <p className="text-white/30 text-sm leading-relaxed max-w-lg mb-10 uppercase tracking-wider">
-            Type a question or snap a picture. Our AI explains it in five different ways â€” Simple, Visual, Analogy, Step-by-Step, or Exam-Oriented.
-          </p>
-          <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-16">
-            <div className="w-full lg:w-1/2">
-              <div className="mt-8 space-y-4">
-                {steps.map((s, i) => (
-                  <motion.div key={i} className="flex items-center gap-4"
-                    initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-                    transition={{ delay: i * 0.15, duration: 0.5, ease }}
-                  >
-                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                      style={{ backgroundColor: s.color + "33", color: s.color, border: `1px solid ${s.color}44` }}
-                    >{i + 1}</div>
-                    <div>
-                      <div className="text-sm font-semibold text-white">{s.label}</div>
-                      <div className="text-xs text-white/40">{s.desc}</div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-            <div className="w-full lg:w-1/2 flex justify-center">
-              <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-6 shadow-2xl">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20">
-                    <Sparkles className="h-4 w-4 text-indigo-400" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-white">AI Doubt Solver</div>
-                    <div className="text-[11px] text-white/30">High Confidence</div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="rounded-2xl bg-white/[0.04] border border-white/5 p-4">
-                    <p className="text-sm text-white/60"><span className="text-white font-medium">Q:</span> What is the derivative of xÂ²?</p>
-                  </div>
-                  <div className="rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-4">
-                    <p className="text-sm text-white/80">
-                      The derivative of <span className="text-indigo-400 font-mono">xÂ²</span> is{" "}
-                      <span className="text-indigo-400 font-mono font-bold">2x</span>.
-                      Power rule: <span className="font-mono">d/dx [xâ¿] = nÂ·xâ¿â»Â¹</span>. Here n=2, so 2Â·xÂ¹ = 2x.
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    {["Simple", "Analogy", "Visual", "Step-by-Step", "Exam"].map((m) => (
-                      <span key={m} className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-medium text-white/40">{m}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  return <DesktopDemo />
-}
-
-function DesktopDemo() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] })
   const steps = [
-    { label: "Ask a doubt", desc: 'What is the derivative of xÂ²?', color: "#6366f1" },
+    { label: "Ask a doubt", desc: 'What is the derivative of x-¦?', color: "#6366f1" },
     { label: "AI analyzes", desc: "Detecting: Calculus / Power Rule", color: "#8b5cf6" },
-    { label: "Step-by-step", desc: "d/dx [xÂ²] = 2Â·xÂ¹ = 2x", color: "#a78bfa" },
-    { label: "Confidence", desc: "High â€” 96% certainty", color: "#22c55e" },
+    { label: "Step-by-step", desc: "d/dx [x-¦] = 2-+x-¦ = 2x", color: "#a78bfa" },
+    { label: "Confidence", desc: "High GÇö 96% certainty", color: "#22c55e" },
   ]
   const activeStep = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [0, 0, 1, 2, 3])
   const stepOpacity0 = useTransform(activeStep, (v) => (v >= 0 ? 1 : 0.2))
@@ -403,18 +315,30 @@ function DesktopDemo() {
     <section ref={containerRef} className="relative bg-[#0a0a0a] min-h-[300vh]">
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 w-full h-full">
+          {/* Left GÇö pinned text */}
           <div className="flex items-center justify-center px-8 lg:px-16">
             <div>
-              <TextReveal text="AI DOUBT SOLVER" className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white mb-6" />
+              <TextReveal
+                text="AI DOUBT SOLVER"
+                className="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white mb-6"
+              />
               <p className="text-white/30 text-sm leading-relaxed max-w-md uppercase tracking-wider">
-                Type a question or snap a picture. Our AI explains it in five different ways â€” Simple, Visual, Analogy, Step-by-Step, or Exam-Oriented.
+                Type a question or snap a picture. Our AI explains it in five different ways GÇö Simple, Visual, Analogy, Step-by-Step, or Exam-Oriented.
               </p>
               <div className="mt-8 space-y-4">
                 {steps.map((s, i) => (
-                  <motion.div key={i} className="flex items-center gap-4" initial={{ opacity: 0.2 }} style={{ opacity: stepOpacities[i] }}>
-                    <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  <motion.div
+                    key={i}
+                    className="flex items-center gap-4"
+                    initial={{ opacity: 0.2 }}
+                    style={{ opacity: stepOpacities[i] }}
+                  >
+                    <div
+                      className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                       style={{ backgroundColor: s.color + "33", color: s.color, border: `1px solid ${s.color}44` }}
-                    >{i + 1}</div>
+                    >
+                      {i + 1}
+                    </div>
                     <div>
                       <div className="text-sm font-semibold text-white">{s.label}</div>
                       <div className="text-xs text-white/40">{s.desc}</div>
@@ -424,8 +348,15 @@ function DesktopDemo() {
               </div>
             </div>
           </div>
+          {/* Right GÇö mock UI */}
           <div className="flex items-center justify-center px-8 lg:px-16">
-            <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-6 shadow-2xl">
+            <motion.div
+              className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-2xl p-6 shadow-2xl"
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease }}
+            >
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/20">
                   <Sparkles className="h-4 w-4 text-indigo-400" />
@@ -436,23 +367,43 @@ function DesktopDemo() {
                 </div>
               </div>
               <div className="space-y-4">
-                <motion.div className="rounded-2xl bg-white/[0.04] border border-white/5 p-4" initial={{ opacity: 0 }} style={{ opacity: mockOpacity0 }}>
-                  <p className="text-sm text-white/60"><span className="text-white font-medium">Q:</span> What is the derivative of xÂ²?</p>
-                </motion.div>
-                <motion.div className="rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-4" initial={{ opacity: 0, y: 10 }} style={{ opacity: mockOpacity2 }}>
-                  <p className="text-sm text-white/80">
-                    The derivative of <span className="text-indigo-400 font-mono">xÂ²</span> is{" "}
-                    <span className="text-indigo-400 font-mono font-bold">2x</span>.
-                    Power rule: <span className="font-mono">d/dx [xâ¿] = nÂ·xâ¿â»Â¹</span>. Here n=2, so 2Â·xÂ¹ = 2x.
+                <motion.div
+                  className="rounded-2xl bg-white/[0.04] border border-white/5 p-4"
+                  initial={{ opacity: 0 }}
+                  style={{ opacity: mockOpacity0 }}
+                >
+                  <p className="text-sm text-white/60">
+                    <span className="text-white font-medium">Q:</span> What is the derivative of x-¦?
                   </p>
                 </motion.div>
-                <motion.div className="flex gap-2" initial={{ opacity: 0 }} style={{ opacity: mockOpacity3 }}>
+                <motion.div
+                  className="rounded-2xl bg-indigo-500/10 border border-indigo-500/20 p-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  style={{ opacity: mockOpacity2 }}
+                >
+                  <p className="text-sm text-white/80">
+                    The derivative of <span className="text-indigo-400 font-mono">x-¦</span> is{" "}
+                    <span className="text-indigo-400 font-mono font-bold">2x</span>.
+                    Power rule: <span className="font-mono">d/dx [xGü+] = n-+xGü+Gü+-¦</span>.
+                    Here n=2, so 2-+x-¦ = 2x.
+                  </p>
+                </motion.div>
+                <motion.div
+                  className="flex gap-2"
+                  initial={{ opacity: 0 }}
+                  style={{ opacity: mockOpacity3 }}
+                >
                   {["Simple", "Analogy", "Visual", "Step-by-Step", "Exam"].map((m) => (
-                    <span key={m} className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-medium text-white/40">{m}</span>
+                    <span
+                      key={m}
+                      className="rounded-lg border border-white/10 px-3 py-1.5 text-[11px] font-medium text-white/40"
+                    >
+                      {m}
+                    </span>
                   ))}
                 </motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -460,14 +411,14 @@ function DesktopDemo() {
   )
 }
 
-/* â”€â”€â”€ 5. HORIZONTAL TEACHERS ROSTER â”€â”€â”€ */
+/* GöÇGöÇGöÇ 5. HORIZONTAL TEACHERS ROSTER GöÇGöÇGöÇ */
 const teachers = [
-  { name: "Sarah Kapoor", subject: "Mathematics", rate: "â‚¹500/hr", rating: 4.9, initials: "SK", color: "#6366f1" },
-  { name: "Rohan Mehta", subject: "Physics", rate: "â‚¹600/hr", rating: 4.8, initials: "RM", color: "#8b5cf6" },
-  { name: "Priya Sharma", subject: "Chemistry", rate: "â‚¹450/hr", rating: 4.9, initials: "PS", color: "#a78bfa" },
-  { name: "Arun Kumar", subject: "Biology", rate: "â‚¹550/hr", rating: 4.7, initials: "AK", color: "#c084fc" },
-  { name: "Neha Gupta", subject: "English", rate: "â‚¹400/hr", rating: 4.9, initials: "NG", color: "#818cf8" },
-  { name: "Vikram Singh", subject: "History", rate: "â‚¹350/hr", rating: 4.6, initials: "VS", color: "#6366f1" },
+  { name: "Sarah Kapoor", subject: "Mathematics", rate: "Gé¦500/hr", rating: 4.9, initials: "SK", color: "#6366f1" },
+  { name: "Rohan Mehta", subject: "Physics", rate: "Gé¦600/hr", rating: 4.8, initials: "RM", color: "#8b5cf6" },
+  { name: "Priya Sharma", subject: "Chemistry", rate: "Gé¦450/hr", rating: 4.9, initials: "PS", color: "#a78bfa" },
+  { name: "Arun Kumar", subject: "Biology", rate: "Gé¦550/hr", rating: 4.7, initials: "AK", color: "#c084fc" },
+  { name: "Neha Gupta", subject: "English", rate: "Gé¦400/hr", rating: 4.9, initials: "NG", color: "#818cf8" },
+  { name: "Vikram Singh", subject: "History", rate: "Gé¦350/hr", rating: 4.6, initials: "VS", color: "#6366f1" },
 ]
 
 function HorizontalRoster() {
@@ -523,7 +474,7 @@ function HorizontalRoster() {
   )
 }
 
-/* â”€â”€â”€ 6. MASTERY VISUALIZATION â”€â”€â”€ */
+/* GöÇGöÇGöÇ 6. MASTERY VISUALIZATION GöÇGöÇGöÇ */
 function MasteryVizSection() {
   const subjects = [
     { name: "Algebra", score: 85 },
@@ -625,13 +576,13 @@ function MasteryVizSection() {
   )
 }
 
-/* â”€â”€â”€ 7. FAQ ACCORDION â”€â”€â”€ */
+/* GöÇGöÇGöÇ 7. FAQ ACCORDION GöÇGöÇGöÇ */
 const faqs = [
   { q: "How does the AI doubt solver work?", a: "Type or upload an image of your doubt. Our AI analyzes it and provides a detailed explanation with confidence scoring. You can choose from 5 explain modes for the same answer." },
   { q: "Are the teachers verified?", a: "Yes. All teachers go through a strict verification process including ID checks, credential validation, and a demo session before they can start teaching." },
   { q: "How do live sessions work?", a: "Book a slot with any verified teacher. You'll get a LiveKit-powered video room with whiteboard, chat, and screen sharing. Sessions are recorded for later review." },
   { q: "What is mastery tracking?", a: "After each session and practice set, your scores are updated per subject. Visual charts show your progress and highlight areas needing improvement." },
-  { q: "Is there a free tier?", a: "Yes. AI doubt solving is free. Live sessions with teachers are paid â€” you only pay for the time you book." },
+  { q: "Is there a free tier?", a: "Yes. AI doubt solving is free. Live sessions with teachers are paid GÇö you only pay for the time you book." },
 ]
 
 function AccordionSection() {
@@ -691,10 +642,9 @@ function AccordionSection() {
   )
 }
 
-/* â”€â”€â”€ 8. MEGA FOOTER â”€â”€â”€ */
+/* GöÇGöÇGöÇ 8. MEGA FOOTER GöÇGöÇGöÇ */
 function MegaFooter() {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
-  const [isTouch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches)
   const mouse = useMousePosition()
   const linkItems = [
     { label: "Features", href: "#" },
@@ -738,8 +688,8 @@ function MegaFooter() {
         </div>
       </div>
 
-      {/* Floating image on hover (desktop only) */}
-      {!isTouch && hoveredLink && (
+      {/* Floating image on hover */}
+      {hoveredLink && (
         <motion.div
           className="pointer-events-none fixed z-20"
           style={{ left: mouse.x + 20, top: mouse.y - 60 }}
@@ -772,10 +722,10 @@ function MegaFooter() {
   )
 }
 
-/* â”€â”€â”€ ASSEMBLE â”€â”€â”€ */
+/* GöÇGöÇGöÇ ASSEMBLE GöÇGöÇGöÇ */
 export default function HomePage() {
   return (
-    <div className="bg-[#0a0a0a] overflow-x-hidden">
+        <div className="bg-[#0a0a0a] overflow-x-hidden">
       <header className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
         <div className="mx-auto flex h-16 items-center justify-between px-6 max-w-7xl">
           <Link href="/" className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-widest">
@@ -800,3 +750,10 @@ export default function HomePage() {
     </div>
   )
 }
+
+
+
+
+
+
+
