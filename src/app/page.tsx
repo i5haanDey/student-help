@@ -303,14 +303,14 @@ function DemoSplitSection() {
     { label: "Step-by-step", desc: "d/dx [x²] = 2·x¹ = 2x", color: "#a78bfa" },
     { label: "Confidence", desc: "High — 96% certainty", color: "#22c55e" },
   ]
-  const activeStep = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [0, 0, 1, 2, 3])
-  const stepOpacity0 = useTransform(activeStep, (v) => (v >= 0 ? 1 : 0.2))
-  const stepOpacity1 = useTransform(activeStep, (v) => (v >= 1 ? 1 : 0.2))
-  const stepOpacity2 = useTransform(activeStep, (v) => (v >= 2 ? 1 : 0.2))
-  const stepOpacity3 = useTransform(activeStep, (v) => (v >= 3 ? 1 : 0.2))
-  const mockOpacity0 = useTransform(activeStep, (v) => (v >= 0 ? 1 : 0))
-  const mockOpacity2 = useTransform(activeStep, (v) => (v >= 2 ? 1 : 0))
-  const mockOpacity3 = useTransform(activeStep, (v) => (v >= 3 ? 1 : 0))
+  const activeStep = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 1], [-0.5, 0, 1, 2, 3])
+  const stepOpacity0 = useTransform(activeStep, [-0.5, 0.3], [0.2, 1])
+  const stepOpacity1 = useTransform(activeStep, [0.7, 1.3], [0.2, 1])
+  const stepOpacity2 = useTransform(activeStep, [1.7, 2.3], [0.2, 1])
+  const stepOpacity3 = useTransform(activeStep, [2.7, 3], [0.2, 1])
+  const mockOpacity0 = useTransform(activeStep, [-0.5, 0.3], [0, 1])
+  const mockOpacity2 = useTransform(activeStep, [1.7, 2.3], [0, 1])
+  const mockOpacity3 = useTransform(activeStep, [2.7, 3], [0, 1])
   const stepOpacities = [stepOpacity0, stepOpacity1, stepOpacity2, stepOpacity3]
 
   return (
