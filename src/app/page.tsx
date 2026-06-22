@@ -50,13 +50,24 @@ function HeroSection() {
   const mouse = useMousePosition()
   const { w } = useWindowSize()
   const [showContent, setShowContent] = useState(false)
+  const [gradPos, setGradPos] = useState(50)
+  const isTouchDevice = typeof navigator !== "undefined" && (("ontouchstart" in (typeof window !== "undefined" ? window : {})) || navigator.maxTouchPoints > 0)
 
   useEffect(() => {
     const t = setTimeout(() => setShowContent(true), 200)
     return () => clearTimeout(t)
   }, [])
 
-  const gradX = (mouse.x / w) * 100
+  useEffect(() => {
+    if (isTouchDevice) {
+      const interval = setInterval(() => {
+        setGradPos((p) => (p + 1) % 200)
+      }, 50)
+      return () => clearInterval(interval)
+    }
+  }, [isTouchDevice])
+
+  const gradX = isTouchDevice ? gradPos : (mouse.x / w) * 100
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-[#0a0a0a]">
@@ -93,7 +104,7 @@ function HeroSection() {
 
           <h1
             className="relative font-black uppercase leading-[0.85] select-none"
-            style={{ fontSize: "clamp(3rem, 12vw, 10rem)", letterSpacing: "-0.04em" }}
+            style={{ fontSize: "clamp(2.5rem, 15vw, 10rem)", letterSpacing: "-0.04em" }}
           >
             <span
               className="bg-clip-text text-transparent"
@@ -163,7 +174,7 @@ function MarqueeSection() {
   ]
   return (
     <section className="relative overflow-hidden border-y border-white/5 bg-[#0c0c0c] py-6 -mt-px">
-      <div className="flex" style={{ transform: "rotate(-2deg) scale(1.05)" }}>
+      <div className="flex" style={{ transform: "rotate(-1.5deg) scale(1.05) translateX(-5%)" }}>
         <motion.div
           className="flex shrink-0 gap-12"
           animate={{ x: ["0%", "-50%"] }}
@@ -189,37 +200,37 @@ const featuresBento = [
     icon: Brain,
     title: "AI Doubt Solver",
     desc: "Upload text or image doubts and get instant AI explanations with confidence scoring.",
-    span: "col-span-1 row-span-1",
+    span: "md:col-span-1 md:row-span-1",
   },
   {
     icon: Sparkles,
     title: "Explain Differently",
     desc: "Five modes — Simple, Visual, Analogy, Step-by-Step, Exam-Oriented.",
-    span: "col-span-1 row-span-1",
+    span: "md:col-span-1 md:row-span-1",
   },
   {
     icon: Users,
     title: "Expert Teachers",
     desc: "Verified educators for personalized 1-on-1 live sessions.",
-    span: "col-span-1 row-span-1",
+    span: "md:col-span-1 md:row-span-1",
   },
   {
     icon: Video,
     title: "Live Classroom",
     desc: "Video sessions with whiteboard, chat, and screen sharing.",
-    span: "col-span-1 row-span-2",
+    span: "md:col-span-1 md:row-span-2",
   },
   {
     icon: Zap,
     title: "Practice Generator",
     desc: "Customized practice sets after every session — Easy, Medium, Advanced.",
-    span: "col-span-1 row-span-1",
+    span: "md:col-span-1 md:row-span-1",
   },
   {
     icon: TrendingUp,
     title: "Mastery Tracking",
     desc: "Track scores per subject with radial charts and recommendations.",
-    span: "col-span-2 row-span-1",
+    span: "md:col-span-2 md:row-span-1",
   },
 ]
 
@@ -283,7 +294,7 @@ function BentoSection() {
             Features designed to make learning effortless.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[180px] md:auto-rows-[200px]">
           {featuresBento.map((f, i) => (
             <BentoCard key={f.title} feature={f} index={i} />
           ))}
@@ -647,6 +658,7 @@ function AccordionSection() {
 /* ─── 8. MEGA FOOTER ─── */
 function MegaFooter() {
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
+  const [isTouch] = useState(() => typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0))
   const mouse = useMousePosition()
   const linkItems = [
     { label: "Features", href: "#" },
@@ -690,8 +702,8 @@ function MegaFooter() {
         </div>
       </div>
 
-      {/* Floating image on hover */}
-      {hoveredLink && (
+      {/* Floating image on hover (desktop only) */}
+      {!isTouch && hoveredLink && (
         <motion.div
           className="pointer-events-none fixed z-20"
           style={{ left: mouse.x + 20, top: mouse.y - 60 }}
@@ -728,7 +740,7 @@ function MegaFooter() {
 export default function HomePage() {
   return (
     <SmoothScroll>
-    <div className="bg-[#0a0a0a]">
+    <div className="bg-[#0a0a0a] overflow-x-hidden">
       <header className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
         <div className="mx-auto flex h-16 items-center justify-between px-6 max-w-7xl">
           <Link href="/" className="flex items-center gap-2 text-sm font-bold text-white uppercase tracking-widest">
