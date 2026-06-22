@@ -225,11 +225,9 @@ const featuresBento = [
 function BentoCard({
   feature,
   index,
-  mouse,
 }: {
   feature: (typeof featuresBento)[number]
   index: number
-  mouse: { x: number; y: number }
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [glow, setGlow] = useState({ x: 0, y: 0 })
@@ -286,7 +284,7 @@ function BentoSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[200px]">
           {featuresBento.map((f, i) => (
-            <BentoCard key={f.title} feature={f} index={i} mouse={mouse} />
+            <BentoCard key={f.title} feature={f} index={i} />
           ))}
         </div>
       </div>
