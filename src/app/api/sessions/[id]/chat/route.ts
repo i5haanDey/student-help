@@ -1,17 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { ChatMessageSchema } from "@/lib/validators"
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
+export const GET = withAuth(async ({ params }) => {
+  const { id } = params
 
   const messages = await prisma.sessionChatMessage.findMany({
     where: { sessionId: id },
@@ -20,28 +13,11 @@ export async function GET(
   })
 
   return NextResponse.json(messages)
-}
+})
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
-
-  const { id } = await params
-  const { messageText } = await req.json()
-
-  if (!messageText?.trim()) {
-    return NextResponse.json({ error: "Message is required" }, { status: 400 })
-  }
+export const POST = withAuth(async ({ req, params, profile }) => {
+  const { id } = params
+  const { messageText } = ChatMessageSchema.parse(await req.json())
 
   const contactRegex = /[\w.+-]+@[\w-]+\.[\w.-]+|\+?\d{10,15}/g
   if (contactRegex.test(messageText)) {
@@ -52,9 +28,9 @@ export async function POST(
     data: {
       sessionId: id,
       senderId: profile.id,
-      messageText: messageText.trim(),
+      messageText,
     },
   })
 
   return NextResponse.json(msg)
-}
+})

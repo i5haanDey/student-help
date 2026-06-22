@@ -62,7 +62,7 @@ const TEACHERS = [
   },
 ]
 
-function generateTimeSlots(profileId: string, daysFromNow: number) {
+function generateTimeSlots(profileId: string) {
   const slots: { teacherId: string; slotStart: Date; slotEnd: Date }[] = []
   const now = new Date()
   for (let day = 1; day <= 7; day++) {
@@ -143,7 +143,7 @@ export async function GET(req: Request) {
     })
 
     if (user.profile) {
-      const slots = generateTimeSlots(user.profile.id, 1)
+      const slots = generateTimeSlots(user.profile.id)
       await prisma.teacherAvailabilitySlot.createMany({ data: slots })
     }
 

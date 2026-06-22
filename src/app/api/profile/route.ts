@@ -1,29 +1,20 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { ProfileUpdateSchema } from "@/lib/validators"
 
-export async function PUT(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
-
+export const PUT = withAuth(async ({ req, profile }) => {
   try {
-    const { displayName, bio, subjects, teachingLanguages, hourlyRateInr } = await req.json()
+    const { displayName, bio, subjects, teachingLanguages, hourlyRateInr } = ProfileUpdateSchema.parse(await req.json())
 
     const updated = await prisma.profile.update({
       where: { id: profile.id },
       data: {
         displayName: displayName ?? profile.displayName,
-        bio: bio ?? profile.bio,
-        subjects: subjects ?? profile.subjects,
-        teachingLanguages: teachingLanguages ?? profile.teachingLanguages,
-        hourlyRateInr: hourlyRateInr ? Number(hourlyRateInr) : profile.hourlyRateInr,
+        bio: bio ?? undefined,
+        subjects: subjects ?? undefined,
+        teachingLanguages: teachingLanguages ?? undefined,
+        hourlyRateInr: hourlyRateInr ?? undefined,
       },
     })
 
@@ -32,4 +23,4 @@ export async function PUT(req: Request) {
     console.error("Profile update error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+})

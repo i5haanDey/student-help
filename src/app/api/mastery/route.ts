@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { MasteryUpdateSchema } from "@/lib/validators"
 
-export async function GET() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
-
+export const GET = withAuth(async ({ profile }) => {
   const scores = await prisma.masteryScore.findMany({
     where: { studentId: profile.id },
     orderBy: { lastUpdated: "desc" },
@@ -43,21 +34,11 @@ export async function GET() {
       totalSubjects: scores.length,
     },
   })
-}
+})
 
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
-
+export const POST = withAuth(async ({ req, profile }) => {
   try {
-    const { subject, practiceScore } = await req.json()
+    const { subject, practiceScore } = MasteryUpdateSchema.parse(await req.json())
 
     const existing = await prisma.masteryScore.findUnique({
       where: { studentId_subject: { studentId: profile.id, subject } },
@@ -95,4 +76,4 @@ export async function POST(req: Request) {
     console.error("Mastery update error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+})

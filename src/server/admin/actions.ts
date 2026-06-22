@@ -4,11 +4,22 @@ import { prisma } from "@/lib/db"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
-export async function approveTeacher(profileId: string) {
+async function requireAdmin() {
   const session = await auth()
   if (!session?.user || session.user.role !== "admin") {
     throw new Error("Unauthorized")
   }
+  return session
+}
+
+export async function approveTeacher(profileId: string) {
+  await requireAdmin()
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: profileId },
+    select: { userId: true },
+  })
+  if (!profile) throw new Error("Profile not found")
 
   await prisma.profile.update({
     where: { id: profileId },
@@ -17,7 +28,7 @@ export async function approveTeacher(profileId: string) {
 
   await prisma.notification.create({
     data: {
-      userId: profileId,
+      userId: profile.userId,
       title: "Verification Approved",
       body: "Your teacher profile has been approved. You can now accept student sessions.",
       type: "verification",
@@ -28,10 +39,13 @@ export async function approveTeacher(profileId: string) {
 }
 
 export async function rejectTeacher(profileId: string) {
-  const session = await auth()
-  if (!session?.user || session.user.role !== "admin") {
-    throw new Error("Unauthorized")
-  }
+  await requireAdmin()
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: profileId },
+    select: { userId: true },
+  })
+  if (!profile) throw new Error("Profile not found")
 
   await prisma.profile.update({
     where: { id: profileId },
@@ -40,7 +54,7 @@ export async function rejectTeacher(profileId: string) {
 
   await prisma.notification.create({
     data: {
-      userId: profileId,
+      userId: profile.userId,
       title: "Verification Rejected",
       body: "Your teacher verification was not approved. You may re-apply after 7 days.",
       type: "verification",

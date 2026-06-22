@@ -1,25 +1,23 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { DoubtExplainSchema } from "@/lib/validators"
 import { aiExplainDifferently } from "@/lib/ai-service"
+import { rateLimitMiddleware } from "@/lib/rate-limit"
 
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+export const POST = withAuth(async ({ req, profile }) => {
+  const rateCheck = rateLimitMiddleware(profile.id, "doubt:explain", 10, 60_000)
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { error: `Rate limit exceeded. Try again in ${Math.ceil((rateCheck.resetAt - Date.now()) / 1000)}s.` },
+      { status: 429, headers: { "X-RateLimit-Remaining": "0", "X-RateLimit-Reset": String(rateCheck.resetAt) } }
+    )
   }
-
   try {
-    const { mode, doubtText } = await req.json()
-
-    if (!mode || !doubtText?.trim()) {
-      return NextResponse.json({ error: "mode and doubtText are required" }, { status: 400 })
-    }
-
+    const { mode, doubtText } = DoubtExplainSchema.parse(await req.json())
     const result = await aiExplainDifferently(mode, doubtText)
-
     return NextResponse.json(result)
   } catch (error) {
     console.error("Explain error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+})

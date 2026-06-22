@@ -1,18 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import { RegisterSchema } from "@/lib/validators"
 import bcrypt from "bcryptjs"
 
 export async function POST(req: Request) {
   try {
-    const { email, password, displayName, role } = await req.json()
-
-    if (!email || !password || !displayName || !role) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 })
-    }
+    const { email, password, displayName, role } = RegisterSchema.parse(await req.json())
 
     const existing = await prisma.user.findUnique({ where: { email } })
     if (existing) {

@@ -1,11 +1,19 @@
+type Role = "student" | "teacher" | "admin"
+type BookingStatus = "pending" | "confirmed" | "in_progress" | "completed" | "cancelled" | "disputed"
+type SessionType = "instant" | "scheduled"
+type ConfidenceLevel = "high" | "medium" | "low"
+type VerificationStatus = "pending" | "under_review" | "approved" | "rejected"
+type ExtensionStatus = "none" | "pending" | "accepted" | "denied" | "expired"
+type SessionPhase = "waiting_for_teacher" | "waiting_for_admit" | "admitted" | "active" | "disconnected" | "post"
+
 declare module "next-auth" {
   interface User {
-    role?: string
+    role?: Role
   }
   interface Session {
     user: {
       id: string
-      role?: string
+      role?: Role
       email: string
       name?: string | null
       image?: string | null
@@ -21,7 +29,7 @@ export interface TeacherProfile {
   subjects: string[]
   teachingLanguages: string[]
   hourlyRateInr: number
-  verificationStatus: string
+  verificationStatus: VerificationStatus
   compositeScore: number
   totalSessions: number
   rank: string
@@ -31,9 +39,9 @@ export interface TeacherProfile {
 export interface BookingWithDetails {
   id: string
   subject: string
-  sessionType: "instant" | "scheduled"
+  sessionType: SessionType
   durationMinutes: number
-  status: string
+  status: BookingStatus
   amountInr: number
   startsAt: string | null
   roomUrl: string | null
@@ -51,7 +59,7 @@ export interface BookingWithDetails {
 
 export interface AiResponse {
   text: string
-  confidenceLevel: "high" | "medium" | "low"
+  confidenceLevel: ConfidenceLevel
   subjectDetected: string
 }
 
@@ -97,7 +105,7 @@ export interface LiveSession {
   studentDurationMs: number | null
   admittedAt: string | null
   disconnectedAt: string | null
-  extensionStatus: string | null
+  extensionStatus: ExtensionStatus | null
   extensionRequestedBy: string | null
   extensionRequestedMin: number | null
   extensionExpiresAt: string | null
@@ -144,7 +152,7 @@ export interface AppNotification {
 }
 
 export interface SessionStatusData {
-  phase: "waiting_for_teacher" | "waiting_for_admit" | "admitted" | "active" | "disconnected" | "post"
+  phase: SessionPhase
   teacherJoined: boolean
   studentJoined: boolean
   admitted: boolean
@@ -153,7 +161,7 @@ export interface SessionStatusData {
   graceRemainingSeconds: number
   graceExpired: boolean
   disconnectedAt: string | null
-  extensionStatus: string | null
+  extensionStatus: ExtensionStatus | null
   extensionRequestedBy: string | null
   extensionRequestedMin: number | null
   extensionExpiresAt: string | null
@@ -165,7 +173,7 @@ export interface SessionDetails {
     subject: string
     sessionType: string
     durationMinutes: number
-    status: string
+    status: BookingStatus
     amountInr: number | null
     startsAt: string | null
     createdAt: string

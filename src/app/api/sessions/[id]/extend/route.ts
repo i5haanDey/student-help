@@ -1,24 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { ExtensionRequestSchema, ExtensionActionSchema } from "@/lib/validators"
 
 const EXTENSION_RESPONSE_TIMEOUT_MS = 3 * 60 * 1000
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
+export const POST = withAuth(async ({ req, params, profile }) => {
+  const { id } = params
 
   const liveSession = await prisma.liveSession.findUnique({
     where: { id },
@@ -26,7 +14,6 @@ export async function POST(
       booking: {
         include: {
           teacher: { select: { displayName: true, hourlyRateInr: true } },
-          student: { select: { id: true, displayName: true } },
         },
       },
     },
@@ -36,9 +23,7 @@ export async function POST(
     return NextResponse.json({ error: "Session not found" }, { status: 404 })
   }
 
-  const isStudent = profile.id === liveSession.booking.studentId
-
-  if (!isStudent) {
+  if (profile.id !== liveSession.booking.studentId) {
     return NextResponse.json({ error: "Only students can request extension" }, { status: 403 })
   }
 
@@ -46,12 +31,7 @@ export async function POST(
     return NextResponse.json({ error: "Extension already requested" }, { status: 409 })
   }
 
-  const body = await req.json()
-  const requestedMinutes = body.requestedMinutes as number
-
-  if (!requestedMinutes || requestedMinutes < 1 || requestedMinutes > 30) {
-    return NextResponse.json({ error: "Extension must be between 1 and 30 minutes" }, { status: 400 })
-  }
+  const { requestedMinutes } = ExtensionRequestSchema.parse(await req.json())
 
   const freeMinutes = Math.min(requestedMinutes, 10)
   const paidMinutes = Math.max(0, requestedMinutes - freeMinutes)
@@ -62,24 +42,25 @@ export async function POST(
 
   const expiresAt = new Date(Date.now() + EXTENSION_RESPONSE_TIMEOUT_MS)
 
-  await prisma.liveSession.update({
-    where: { id },
-    data: {
-      extensionRequestedBy: profile.id,
-      extensionRequestedMin: requestedMinutes,
-      extensionStatus: "pending",
-      extensionExpiresAt: expiresAt,
-    },
-  })
-
-  await prisma.notification.create({
-    data: {
-      userId: liveSession.booking.teacherId,
-      title: "Extension Request",
-      body: `${profile.displayName} wants to extend by ${requestedMinutes} min (First 10 free, ₹${cost} for ${paidMinutes} min).`,
-      type: "extension",
-    },
-  })
+  await prisma.$transaction([
+    prisma.liveSession.update({
+      where: { id },
+      data: {
+        extensionRequestedBy: profile.id,
+        extensionRequestedMin: requestedMinutes,
+        extensionStatus: "pending",
+        extensionExpiresAt: expiresAt,
+      },
+    }),
+    prisma.notification.create({
+      data: {
+        userId: liveSession.booking.teacherId,
+        title: "Extension Request",
+        body: `${profile.displayName} wants to extend by ${requestedMinutes} min (First 10 free, ₹${cost} for ${paidMinutes} min).`,
+        type: "extension",
+      },
+    }),
+  ])
 
   return NextResponse.json({
     success: true,
@@ -88,23 +69,10 @@ export async function POST(
     cost,
     expiresAt: expiresAt.toISOString(),
   })
-}
+})
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
+export const PATCH = withAuth(async ({ req, params, profile }) => {
+  const { id } = params
 
   const liveSession = await prisma.liveSession.findUnique({
     where: { id },
@@ -131,50 +99,47 @@ export async function PATCH(
     return NextResponse.json({ error: "Extension request expired" }, { status: 408 })
   }
 
-  const body = await req.json()
-  const action = body.action as string
+  const { action } = ExtensionActionSchema.parse(await req.json())
 
   if (action === "accept") {
     const added = liveSession.extensionRequestedMin ?? 0
     const current = liveSession.extendedByMinutes ?? 0
 
-    await prisma.liveSession.update({
-      where: { id },
-      data: {
-        extensionStatus: "accepted",
-        extendedByMinutes: current + added,
-      },
-    })
-
-    await prisma.notification.create({
-      data: {
-        userId: liveSession.booking.studentId,
-        title: "Extension Accepted",
-        body: `Teacher accepted your ${added}-minute extension request.`,
-        type: "extension",
-      },
-    })
+    await prisma.$transaction([
+      prisma.liveSession.update({
+        where: { id },
+        data: {
+          extensionStatus: "accepted",
+          extendedByMinutes: current + added,
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId: liveSession.booking.studentId,
+          title: "Extension Accepted",
+          body: `Teacher accepted your ${added}-minute extension request.`,
+          type: "extension",
+        },
+      }),
+    ])
 
     return NextResponse.json({ success: true, extendedByMinutes: current + added })
   }
 
-  if (action === "deny") {
-    await prisma.liveSession.update({
+  await prisma.$transaction([
+    prisma.liveSession.update({
       where: { id },
       data: { extensionStatus: "denied" },
-    })
-
-    await prisma.notification.create({
+    }),
+    prisma.notification.create({
       data: {
         userId: liveSession.booking.studentId,
         title: "Extension Denied",
         body: "Teacher declined the extension request. Session will end on time.",
         type: "extension",
       },
-    })
+    }),
+  ])
 
-    return NextResponse.json({ success: true, extensionStatus: "denied" })
-  }
-
-  return NextResponse.json({ error: "Invalid action. Use 'accept' or 'deny'." }, { status: 400 })
-}
+  return NextResponse.json({ success: true, extensionStatus: "denied" })
+})

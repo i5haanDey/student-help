@@ -2,6 +2,8 @@
 
 An ed-tech platform connecting students with AI doubt-solving and live teacher sessions. Built with Next.js 16, TypeScript, Tailwind CSS v4, Prisma, NextAuth v5, and LiveKit.
 
+> **Security-hardened codebase.** All API routes use schema validation (Zod), centralized auth (`withAuth`), allowlisted session field updates, rate-limited AI endpoints, CSP headers via middleware, and transactional database writes.
+
 **Live:** [student-help.vercel.app](https://student-help.vercel.app)
 
 ## Tech Stack
@@ -70,6 +72,7 @@ Copy `.env.example` to `.env.local` and fill in the values.
 | `RAZORPAY_KEY_SECRET` | No | Payments |
 | `NEXT_PUBLIC_RAZORPAY_KEY_ID` | No | Payments |
 | `RESEND_API_KEY` | No | Email |
+| `CRON_SECRET` | No | Bearer token for `/api/cron/expire-bookings` |
 
 Only `DATABASE_URL` and `AUTH_SECRET` are required.
 
@@ -89,7 +92,22 @@ src/
 ├── app/              # Next.js App Router
 │   ├── (auth)/       # Login, register, onboarding
 │   ├── (dashboard)/  # Student / Teacher / Admin dashboards
-│   └── api/          # 22 REST route handler groups
+│   └── api/          # REST route handlers
+│       ├── auth/     # Registration + NextAuth
+│       ├── bookings/ # Booking CRUD
+│       ├── cron/     # Scheduled tasks (booking expiry)
+│       ├── doubt/    # AI doubt solving + explain modes
+│       ├── livekit/  # LiveKit token generation
+│       ├── mastery/  # Subject mastery tracking
+│       ├── notifications/
+│       ├── onboarding/ # Student & teacher profiles
+│       ├── payments/ # Mock payment + refund
+│       ├── practice/ # AI-generated practice sets
+│       ├── profile/  # User profile management
+│       ├── ratings/  # Post-session ratings
+│       ├── sessions/ # Full session lifecycle (join, admit, disconnect,
+│       │             # extend, end, chat, whiteboard, summary, details)
+│       └── teachers/ # Search, availability, verification
 ├── components/       # React components by domain
 │   ├── ui/           # shadcn/ui primitives
 │   ├── auth/         # Login, register, onboarding forms
@@ -101,14 +119,26 @@ src/
 │   ├── practice/     # Practice session UI
 │   ├── mastery/      # Mastery dashboard
 │   └── dummy/        # Placeholder pages
-├── lib/              # Core utilities (auth, db, ai-service)
-├── server/           # Server actions (admin, auth)
-└── types/            # TypeScript type definitions
+├── lib/              # Core utilities
+│   ├── auth.ts       # NextAuth configuration
+│   ├── auth.config.ts
+│   ├── db.ts         # Prisma client
+│   ├── ai-service.ts # OpenAI integration
+│   ├── validators.ts # Zod schemas (20+ — all API inputs validated)
+│   ├── with-auth.ts  # Auth wrapper (401/403/404 boilerplate eliminated)
+│   └── rate-limit.ts # In-memory rate limiter
+├── services/         # Extracted business logic (testable)
+│   ├── pricing.ts    # Pricing calculator + constants (unit-tested)
+│   ├── booking.service.ts
+│   └── session.service.ts
+├── server/           # Server actions (admin teacher approval)
+├── middleware.ts     # Route protection + CSP headers
+└── types/            # TypeScript type definitions (Role enum, strict unions)
 ```
 
 ## API Routes
 
-All routes check `auth()` and return 401/403 for unauthorized requests.
+All routes use `withAuth()` for centralized auth (401/403/404) and Zod schema validation. Rate-limited: `/api/doubt/solve` (5/min), `/api/doubt/explain` (10/min).
 
 | Endpoint | Methods | Purpose |
 |----------|---------|---------|
@@ -144,6 +174,7 @@ All routes check `auth()` and return 401/403 for unauthorized requests.
 | `/api/ratings` | POST | Post-session ratings |
 | `/api/notifications` | GET/PATCH | In-app notifications |
 | `/api/profile` | PUT | Update profile |
+| `/api/cron/expire-bookings` | GET | Booking expiry (secured by `CRON_SECRET`) |
 
 ## Scripts
 
@@ -152,6 +183,9 @@ All routes check `auth()` and return 401/403 for unauthorized requests.
 | `npm run dev` | Start dev server |
 | `npm run build` | Production build |
 | `npm run lint` | Run ESLint |
+| `npm test` | Run unit tests (watch mode) |
+| `npm run test:run` | Run unit tests (single run) |
+| `npm run cron:expire` | Expire past-due confirmed bookings (CLI cron) |
 | `npx prisma generate` | Regenerate Prisma client |
 | `npx prisma db push` | Push schema to database |
 

@@ -1,40 +1,20 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
+export const GET = withAuth(async ({ params }) => {
+  const { id } = params
 
   const liveSession = await prisma.liveSession.findUnique({
     where: { id },
     select: { whiteboardState: true },
   })
 
-  if (!liveSession) {
-    return NextResponse.json({ snapshot: null })
-  }
+  return NextResponse.json({ snapshot: liveSession?.whiteboardState ?? null })
+})
 
-  return NextResponse.json({ snapshot: liveSession.whiteboardState })
-}
-
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
+export const PUT = withAuth(async ({ req, params }) => {
+  const { id } = params
   const { snapshot } = await req.json()
 
   await prisma.liveSession.update({
@@ -43,4 +23,4 @@ export async function PUT(
   })
 
   return NextResponse.json({ success: true })
-}
+})

@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { withAuth } from "@/lib/with-auth"
 import { aiSolveDoubt } from "@/lib/ai-service"
+import { rateLimitMiddleware } from "@/lib/rate-limit"
 
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+export const POST = withAuth(async ({ req, profile }) => {
+  const rateCheck = rateLimitMiddleware(profile.id, "doubt:solve", 5, 60_000)
+  if (!rateCheck.allowed) {
+    return NextResponse.json(
+      { error: `Rate limit exceeded. Try again in ${Math.ceil((rateCheck.resetAt - Date.now()) / 1000)}s.` },
+      { status: 429, headers: { "X-RateLimit-Remaining": "0", "X-RateLimit-Reset": String(rateCheck.resetAt) } }
+    )
   }
-
   try {
     const formData = await req.formData()
     const text = (formData.get("text") as string) ?? ""
@@ -16,14 +19,6 @@ export async function POST(req: Request) {
 
     if (!text.trim() && !image) {
       return NextResponse.json({ error: "No doubt provided" }, { status: 400 })
-    }
-
-    const profile = await prisma.profile.findUnique({
-      where: { userId: session.user.id },
-    })
-
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 })
     }
 
     if (image && image.size > 5 * 1024 * 1024) {
@@ -73,4 +68,4 @@ export async function POST(req: Request) {
     console.error("Doubt solve error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+})

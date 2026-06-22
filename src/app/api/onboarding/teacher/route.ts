@@ -1,32 +1,28 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { TeacherOnboardingSchema } from "@/lib/validators"
 
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
+export const POST = withAuth(async ({ req, profile }) => {
   try {
-    const { displayName, bio, subjects, teachingLanguages, hourlyRateInr, timezone } = await req.json()
+    const data = TeacherOnboardingSchema.parse(await req.json())
 
-    const profile = await prisma.profile.update({
-      where: { userId: session.user.id },
+    const updated = await prisma.profile.update({
+      where: { id: profile.id },
       data: {
-        displayName,
-        bio,
-        subjects,
-        teachingLanguages,
-        hourlyRateInr: Number(hourlyRateInr),
-        timezone,
+        displayName: data.displayName,
+        bio: data.bio,
+        subjects: data.subjects,
+        teachingLanguages: data.teachingLanguages,
+        hourlyRateInr: data.hourlyRateInr,
+        timezone: data.timezone,
         verificationStatus: "pending",
       },
     })
 
-    return NextResponse.json({ success: true, profile })
+    return NextResponse.json({ success: true, profile: updated })
   } catch (error) {
     console.error("Teacher onboarding error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+})

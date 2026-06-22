@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
 import { aiGenerateSummary } from "@/lib/ai-service"
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const userSession = await auth()
-  if (!userSession?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
+export const POST = withAuth(async ({ params }) => {
   try {
-    const { id } = await params
+    const { id } = params
 
     const liveSession = await prisma.liveSession.findUnique({
       where: { id },
@@ -41,4 +36,4 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     console.error("Summary error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+})

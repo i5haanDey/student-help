@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
+export const GET = withAuth(async ({ params, profile }) => {
+  const { id } = params
 
   const liveSession = await prisma.liveSession.findUnique({
     where: { id },
@@ -34,7 +21,6 @@ export async function GET(
   }
 
   const now = new Date()
-  const startsAt = liveSession.booking.startsAt
   const graceEndedAt = liveSession.graceEndedAt
   const durationMs = liveSession.booking.durationMinutes * 60 * 1000
   const extendedMs = (liveSession.extendedByMinutes ?? 0) * 60 * 1000
@@ -68,15 +54,6 @@ export async function GET(
 
   const graceExpired = !!graceEndedAt && now > graceEndedAt && !liveSession.teacherJoinedAt
 
-  if (liveSession.extensionStatus === "pending" && liveSession.extensionExpiresAt) {
-    if (now > liveSession.extensionExpiresAt) {
-      await prisma.liveSession.update({
-        where: { id },
-        data: { extensionStatus: "denied" },
-      })
-    }
-  }
-
   return NextResponse.json({
     phase,
     teacherJoined: !!liveSession.teacherJoinedAt,
@@ -92,4 +69,4 @@ export async function GET(
     extensionRequestedMin: liveSession.extensionRequestedMin,
     extensionExpiresAt: liveSession.extensionExpiresAt?.toISOString() ?? null,
   })
-}
+})

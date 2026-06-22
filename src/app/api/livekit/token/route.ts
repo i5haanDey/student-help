@@ -1,25 +1,12 @@
 import { NextResponse } from "next/server"
 import { AccessToken } from "livekit-server-sdk"
-import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { withAuth } from "@/lib/with-auth"
+import { LiveKitTokenSchema } from "@/lib/validators"
 
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
-
+export const POST = withAuth(async ({ req, profile }) => {
   try {
-    const { roomName } = await req.json()
-
-    if (!roomName) {
-      return NextResponse.json({ error: "Missing roomName" }, { status: 400 })
-    }
+    const { roomName } = LiveKitTokenSchema.parse(await req.json())
 
     const bookingId = roomName.replace("room_", "")
     if (!bookingId || bookingId === roomName) {
@@ -67,4 +54,4 @@ export async function POST(req: Request) {
     console.error("LiveKit token error:", error)
     return NextResponse.json({ error: "Failed to generate token" }, { status: 500 })
   }
-}
+})

@@ -1,21 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { PracticeCreateSchema } from "@/lib/validators"
 import { aiGeneratePractice } from "@/lib/ai-service"
 
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
-
+export const POST = withAuth(async ({ req, profile }) => {
   try {
-    const { sessionId, subject } = await req.json()
+    const { sessionId, subject } = PracticeCreateSchema.parse(await req.json())
 
     let context: string | undefined
     if (sessionId) {
@@ -55,4 +46,4 @@ export async function POST(req: Request) {
     console.error("Practice generate error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+})

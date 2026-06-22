@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
+import { AvailabilityCreateSchema, AvailabilityDeleteSchema } from "@/lib/validators"
 
-export async function GET() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-
-  if (!profile || profile.role !== "teacher") {
+export const GET = withAuth(async ({ profile }) => {
+  if (profile.role !== "teacher") {
     return NextResponse.json({ error: "Not a teacher" }, { status: 403 })
   }
 
@@ -22,25 +14,16 @@ export async function GET() {
   })
 
   return NextResponse.json(slots)
-}
+}, { role: "teacher" })
 
-export async function POST(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-
-  if (!profile || profile.role !== "teacher") {
+export const POST = withAuth(async ({ req, profile }) => {
+  if (profile.role !== "teacher") {
     return NextResponse.json({ error: "Not a teacher" }, { status: 403 })
   }
 
   try {
-    const { slots } = await req.json()
-    const data = slots.map((s: { slotStart: string; slotEnd: string; isRecurring?: boolean }) => ({
+    const { slots } = AvailabilityCreateSchema.parse(await req.json())
+    const data = slots.map((s) => ({
       teacherId: profile.id,
       slotStart: new Date(s.slotStart),
       slotEnd: new Date(s.slotEnd),
@@ -54,24 +37,15 @@ export async function POST(req: Request) {
     console.error("Availability create error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+}, { role: "teacher" })
 
-export async function DELETE(req: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-
-  if (!profile || profile.role !== "teacher") {
+export const DELETE = withAuth(async ({ req, profile }) => {
+  if (profile.role !== "teacher") {
     return NextResponse.json({ error: "Not a teacher" }, { status: 403 })
   }
 
   try {
-    const { id } = await req.json()
+    const { id } = AvailabilityDeleteSchema.parse(await req.json())
 
     await prisma.teacherAvailabilitySlot.deleteMany({
       where: { id, teacherId: profile.id },
@@ -82,4 +56,4 @@ export async function DELETE(req: Request) {
     console.error("Availability delete error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
-}
+}, { role: "teacher" })

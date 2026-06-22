@@ -1,24 +1,10 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
+import { withAuth } from "@/lib/with-auth"
 import type { Prisma } from "@/generated/prisma/client"
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
-
+export const GET = withAuth(async ({ req, params, profile }) => {
+  const { id } = params
   const { searchParams } = new URL(req.url)
   const includeLive = searchParams.get("include") === "liveSession"
 
@@ -51,24 +37,11 @@ export async function GET(
     teacherPayoutInr: booking.teacherPayoutInr ? Number(booking.teacherPayoutInr) : null,
     status: booking.status,
   })
-}
+})
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  const { id } = await params
+export const PATCH = withAuth(async ({ req, params, profile }) => {
+  const { id } = params
   const { status } = await req.json()
-
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
 
   const booking = await prisma.booking.findUnique({ where: { id } })
   if (!booking) return NextResponse.json({ error: "Booking not found" }, { status: 404 })
@@ -88,4 +61,4 @@ export async function PATCH(
   })
 
   return NextResponse.json(updated)
-}
+})

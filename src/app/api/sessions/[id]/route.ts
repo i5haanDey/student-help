@@ -1,18 +1,34 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { auth } from "@/lib/auth"
-import type { Prisma } from "@/generated/prisma/client"
+import { withAuth } from "@/lib/with-auth"
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+const ALLOWED_PATCH_FIELDS = [
+  "teacherJoinedAt",
+  "studentJoinedAt",
+  "actualStartAt",
+  "teacherDurationMs",
+  "studentDurationMs",
+  "disconnectedAt",
+  "admittedAt",
+  "extensionRequestedBy",
+  "extensionRequestedMin",
+  "extensionExpiresAt",
+] as const
 
-  const { id } = await params
+type AllowedField = typeof ALLOWED_PATCH_FIELDS[number]
+
+function isAllowedField(field: string): field is AllowedField {
+  return ALLOWED_PATCH_FIELDS.includes(field as AllowedField)
+}
+
+const TEACHER_ONLY_FIELDS = new Set<AllowedField>([
+  "teacherJoinedAt",
+  "teacherDurationMs",
+  "admittedAt",
+])
+
+export const PATCH = withAuth(async ({ req, params, profile }) => {
+  const { id } = params
   const body = await req.json()
 
   const liveSession = await prisma.liveSession.findUnique({
@@ -24,23 +40,27 @@ export async function PATCH(
     return NextResponse.json({ error: "Live session not found" }, { status: 404 })
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 })
+  const isTeacher = liveSession.booking.teacherId === profile.id
+  const isStudent = liveSession.booking.studentId === profile.id
 
-  if (
-    liveSession.booking.studentId !== profile.id &&
-    liveSession.booking.teacherId !== profile.id
-  ) {
+  if (!isTeacher && !isStudent) {
     return NextResponse.json({ error: "Not your session" }, { status: 403 })
   }
 
-  const data: Prisma.LiveSessionUpdateInput = {}
-  if (body.startedAt) data.startedAt = new Date(body.startedAt)
-  if (body.endedAt) data.endedAt = new Date(body.endedAt)
-  if (body.summaryText) data.summaryText = body.summaryText
-  if (body.aiSummaryStatus) data.aiSummaryStatus = body.aiSummaryStatus
+  const data: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(body)) {
+    if (!isAllowedField(key)) {
+      return NextResponse.json({ error: `Field "${key}" is not allowed` }, { status: 400 })
+    }
+    if (isStudent && TEACHER_ONLY_FIELDS.has(key)) {
+      return NextResponse.json({ error: `Field "${key}" is teacher-only` }, { status: 403 })
+    }
+    if (typeof value === "string" && key.endsWith("At")) {
+      data[key] = new Date(value)
+    } else {
+      data[key] = value
+    }
+  }
 
   const updated = await prisma.liveSession.update({
     where: { id },
@@ -48,4 +68,4 @@ export async function PATCH(
   })
 
   return NextResponse.json(updated)
-}
+})
