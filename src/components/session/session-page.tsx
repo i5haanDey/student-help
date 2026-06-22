@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, ArrowLeft, WifiOff } from "lucide-react"
+import { Loader2, ArrowLeft, WifiOff, Bot } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SessionLobby } from "@/components/session/session-lobby"
 import { ActiveSession } from "@/components/session/active-session"
@@ -11,6 +11,9 @@ import { ExtensionModal } from "@/components/session/extension-modal"
 import { toast } from "sonner"
 import type { SessionStatusData } from "@/types"
 import { PatternBg } from "@/components/ui/pattern-bg"
+
+const BOT_ENABLED = process.env.NEXT_PUBLIC_ENABLE_BOT_TEACHER === "true"
+const BOT_JOIN_DELAY_MS = 60_000
 
 const POLL_INTERVAL = 3000
 const EXTENSION_TRIGGER_SECONDS = 11 * 60
@@ -49,8 +52,10 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
   const [graceExpired, setGraceExpired] = useState(false)
   const [disconnectedOverlay, setDisconnectedOverlay] = useState(false)
   const [disconnectTimer, setDisconnectTimer] = useState(300)
+  const [botTriggered, setBotTriggered] = useState(false)
   const extensionTriggeredRef = useRef(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -138,6 +143,19 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
     }
   }, [disconnectTimer, disconnectedOverlay])
 
+  useEffect(() => {
+    if (!BOT_ENABLED || role !== "student" || phase !== "lobby") return
+    if (status?.teacherJoined || status?.admitted || botTriggered) return
+
+    botTimerRef.current = setTimeout(() => {
+      handleSimulateTeacher()
+    }, BOT_JOIN_DELAY_MS)
+
+    return () => {
+      if (botTimerRef.current) clearTimeout(botTimerRef.current)
+    }
+  }, [BOT_ENABLED, role, phase, status?.teacherJoined, status?.admitted, botTriggered])
+
   async function handleJoin() {
     if (!data?.liveSession?.roomName || !liveSessionId) {
       toast.error("Session not set up yet.")
@@ -169,6 +187,23 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
       throw new Error(err.error)
     }
     toast.success("Student admitted!")
+  }
+
+  async function handleSimulateTeacher() {
+    if (!liveSessionId || botTriggered) return
+    setBotTriggered(true)
+    if (botTimerRef.current) clearTimeout(botTimerRef.current)
+    try {
+      const res = await fetch(`/api/sessions/${liveSessionId}/simulate-teacher-join`, { method: "POST" })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error)
+      }
+      toast.success("Bot teacher has joined! You can now enter the session.")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to simulate teacher join")
+      setBotTriggered(false)
+    }
   }
 
   async function handleExtension(minutes: number) {
@@ -304,6 +339,7 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
             })
             toast.success("Extension accepted!")
           }}
+          isBotTeacher={BOT_ENABLED && botTriggered}
           onExtensionDeny={async () => {
             if (!liveSessionId) return
             await fetch(`/api/sessions/${liveSessionId}/extend`, {
@@ -339,7 +375,7 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 p-4">
       <SessionLobby
         bookingId={data.id}
         liveSessionId={data.liveSession?.id ?? ""}
@@ -358,6 +394,17 @@ export function SessionPage({ role, bookingId, profileId }: SessionPageProps) {
         hourlyRate={500}
         onGraceExpired={() => setGraceExpired(true)}
       />
+      {BOT_ENABLED && role === "student" && !status?.teacherJoined && !botTriggered && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSimulateTeacher}
+          className="gap-2"
+        >
+          <Bot className="h-4 w-4" />
+          Simulate Teacher (Skip Wait)
+        </Button>
+      )}
     </div>
   )
 }

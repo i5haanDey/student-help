@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX, Wifi, WifiOff, ChevronDown } from "lucide-react"
+import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX, Wifi, WifiOff, ChevronDown, Bot } from "lucide-react"
 import { toast } from "sonner"
 import { PatternBg } from "@/components/ui/pattern-bg"
 
@@ -31,6 +31,7 @@ interface ActiveSessionProps {
   remainingSeconds: number
   extensionStatus: string | null
   isTeacherAnswer: boolean
+  isBotTeacher?: boolean
   onExtensionAccept: () => Promise<void>
   onExtensionDeny: () => Promise<void>
 }
@@ -51,6 +52,7 @@ export function ActiveSession({
   remainingSeconds: initialRemaining,
   extensionStatus,
   isTeacherAnswer,
+  isBotTeacher,
   onExtensionAccept,
   onExtensionDeny,
 }: ActiveSessionProps) {
@@ -275,7 +277,7 @@ export function ActiveSession({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="video" className="flex-1 p-0 m-0 data-[state=active]:flex flex-col">
+            <TabsContent value="video" className="flex-1 p-0 m-0 data-[state=active]:flex flex-col relative">
               <LiveKitRoom
                 token={token}
                 serverUrl={livekitUrl}
@@ -284,6 +286,18 @@ export function ActiveSession({
                 className="flex-1"
               >
                 <VideoConference />
+                {isBotTeacher && (
+                  <div className="absolute bottom-4 left-4 z-10 flex flex-col items-center gap-1.5 rounded-xl border bg-background/80 backdrop-blur-sm p-3 shadow-lg">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+                      {getInitials(otherName)}
+                    </div>
+                    <span className="text-xs font-medium">{otherName}</span>
+                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <Bot className="h-3 w-3" />
+                      Bot Teacher
+                    </span>
+                  </div>
+                )}
               </LiveKitRoom>
             </TabsContent>
 
@@ -356,4 +370,13 @@ export function ActiveSession({
       </Dialog>
     </div>
   )
+}
+
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .filter(Boolean)
+    .join(".")
+    .toUpperCase()
 }
