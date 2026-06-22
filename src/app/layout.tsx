@@ -4,7 +4,7 @@ import "./globals.css"
 import { Providers } from "@/components/providers"
 import { PwaRegister } from "@/components/pwa-register"
 import { ScrollProgressBar } from "@/components/layout/scroll-progress-bar"
-import { SmoothScroll } from "@/components/motion/smooth-scroll"
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -60,9 +60,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <Providers>
-          <SmoothScroll>
-            {children}
-          </SmoothScroll>
+          {children}
         </Providers>
         <PwaRegister />
         <ScrollProgressBar />

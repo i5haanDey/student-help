@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { MagneticButton } from "@/components/motion/magnetic-button-awwwards"
 import { TextReveal } from "@/components/motion/text-reveal"
+import { SmoothScroll } from "@/components/motion/smooth-scroll"
 
 const ease = [0.76, 0, 0.24, 1] as const
 
@@ -726,6 +727,7 @@ function MegaFooter() {
 /* ─── ASSEMBLE ─── */
 export default function HomePage() {
   return (
+    <SmoothScroll>
     <div className="bg-[#0a0a0a]">
       <header className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
         <div className="mx-auto flex h-16 items-center justify-between px-6 max-w-7xl">
@@ -749,5 +751,6 @@ export default function HomePage() {
       <AccordionSection />
       <MegaFooter />
     </div>
+    </SmoothScroll>
   )
 }
