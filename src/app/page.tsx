@@ -15,6 +15,7 @@ import {
   ChevronDown,
   TrendingUp,
   X,
+  BarChart3,
 } from "lucide-react"
 import { MagneticButton } from "@/components/motion/magnetic-button-awwwards"
 import { TextReveal } from "@/components/motion/text-reveal"
@@ -163,7 +164,7 @@ function MarqueeSection() {
   ]
   return (
     <section className="relative overflow-hidden border-y border-white/5 bg-[#0c0c0c] py-6 -mt-px">
-      <div className="flex" style={{ transform: "rotate(-2deg) scale(1.05)" }}>
+      <div className="flex" style={{ transform: "scale(1.05)" }}>
         <motion.div
           className="flex shrink-0 gap-12"
           animate={{ x: ["0%", "-50%"] }}
@@ -213,6 +214,12 @@ const featuresBento = [
     icon: Zap,
     title: "Practice Generator",
     desc: "Customized practice sets after every session — Easy, Medium, Advanced.",
+    span: "md:col-span-1 md:row-span-1",
+  },
+  {
+    icon: BarChart3,
+    title: "Performance Analytics",
+    desc: "Deep insights into your strengths, weaknesses, and growth trends.",
     span: "md:col-span-1 md:row-span-1",
   },
   {
@@ -615,7 +622,7 @@ function AccordionSection() {
               >
                 <span className="text-sm font-semibold text-white">{faq.q}</span>
                 <motion.div
-                  animate={{ rotate: openIndex === i ? 45 : 0 }}
+                  animate={{ rotate: openIndex === i ? 0 : 45 }}
                   transition={{ duration: 0.3, ease }}
                 >
                   <X className="h-4 w-4 text-white/30" />
