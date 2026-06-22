@@ -103,7 +103,7 @@ model User {
   authProvider  AuthProvider @default(email) @map("auth_provider")
   isVerified    Boolean   @default(false) @map("is_verified")
   createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  updatedAt     DateTime  @updatedAt @default(now()) @map("updated_at")
   lastActiveAt  DateTime? @map("last_active_at")
   isDeleted     Boolean   @default(false) @map("is_deleted")
 
@@ -139,7 +139,7 @@ model Profile {
   reliabilityScore  Int?                @default(100) @map("reliability_score")
   earningsTotal     Decimal?            @default(0) @db.Decimal(12, 2) @map("earnings_total")
   earningsPending   Decimal?            @default(0) @db.Decimal(12, 2) @map("earnings_pending")
-  updatedAt         DateTime            @updatedAt @map("updated_at")
+  updatedAt         DateTime            @updatedAt @default(now()) @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -185,7 +185,7 @@ model Booking {
   paymentId       String?      @map("payment_id")
   roomUrl         String?      @map("room_url")
   createdAt       DateTime     @default(now()) @map("created_at")
-  updatedAt       DateTime     @updatedAt @map("updated_at")
+  updatedAt       DateTime     @updatedAt @default(now()) @map("updated_at")
   startsAt        DateTime?    @map("starts_at")
   endedAt         DateTime?    @map("ended_at")
 
@@ -209,7 +209,7 @@ model LiveSession {
   startedAt       DateTime?   @map("started_at")
   endedAt         DateTime?   @map("ended_at")
   aiSummaryStatus String      @default("pending") @map("ai_summary_status")
-  updatedAt       DateTime    @updatedAt @map("updated_at")
+  updatedAt       DateTime    @updatedAt @default(now()) @map("updated_at")
 
   teacherJoinedAt   DateTime? @map("teacher_joined_at")
   studentJoinedAt   DateTime? @map("student_joined_at")
