@@ -9,11 +9,11 @@ export function middleware() {
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.livekit.cloud https://vercel.live",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data: https://lh3.googleusercontent.com https://utfs.io https://avatars.githubusercontent.com",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.livekit.cloud wss://*.livekit.cloud https://api.openai.com",
+      "img-src 'self' blob: data: https://lh3.googleusercontent.com https://utfs.io https://avatars.githubusercontent.com https://cdn.tldraw.com",
+      "font-src 'self' data: https://cdn.tldraw.com",
+      "connect-src 'self' https://*.livekit.cloud wss://*.livekit.cloud https://api.openai.com https://cdn.tldraw.com",
       "frame-src 'self' https://*.livekit.cloud",
-      "worker-src 'self' blob:",
+      "worker-src 'self' blob: https://cdn.tldraw.com",
     ].join("; ")
   )
   response.headers.set("X-Frame-Options", "DENY")
