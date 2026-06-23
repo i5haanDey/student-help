@@ -1,6 +1,6 @@
 "use client"
 
-import { Component, type ReactNode } from "react"
+import { Component, type ReactNode, memo } from "react"
 import { Tldraw } from "@tldraw/tldraw"
 import "@tldraw/tldraw/tldraw.css"
 
@@ -68,12 +68,20 @@ class ErrorBoundary extends Component<
   }
 }
 
-export function SessionWhiteboard(_props: { sessionId: string }) {
+const MemoizedTldraw = memo(function MemoizedTldraw() {
+  return <Tldraw colorScheme="light" />
+})
+
+export const SessionWhiteboard = memo(function SessionWhiteboard({
+  sessionId: _sessionId,
+}: {
+  sessionId: string
+}) {
   return (
     <div className="h-full w-full relative bg-white" style={{ isolation: "isolate" }}>
       <ErrorBoundary>
-        <Tldraw colorScheme="light" />
+        <MemoizedTldraw />
       </ErrorBoundary>
     </div>
   )
-}
+})
