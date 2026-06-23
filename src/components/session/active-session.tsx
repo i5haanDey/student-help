@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { LiveKitRoom, ControlBar, ParticipantLoop, ParticipantTile, useRemoteParticipants, useLocalParticipant } from "@livekit/components-react"
+import { LiveKitRoom, ControlBar, ParticipantLoop, ParticipantTile, useParticipants, useLocalParticipant } from "@livekit/components-react"
 import "@livekit/components-styles"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SessionWhiteboard } from "@/components/session/session-whiteboard"
@@ -404,7 +404,7 @@ interface RoomViewProps {
 }
 
 function RoomView({ isBotTeacher, otherName, onMediaStateChange, controlsRef }: RoomViewProps) {
-  const participants = useRemoteParticipants()
+  const participants = useParticipants()
   const { isCameraEnabled, isMicrophoneEnabled, localParticipant } = useLocalParticipant()
 
   useEffect(() => {
@@ -418,15 +418,9 @@ function RoomView({ isBotTeacher, otherName, onMediaStateChange, controlsRef }: 
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 relative">
-        {participants.length > 0 ? (
-          <ParticipantLoop participants={participants}>
-            <ParticipantTile />
-          </ParticipantLoop>
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Waiting for other participant...
-          </div>
-        )}
+        <ParticipantLoop participants={participants}>
+          <ParticipantTile />
+        </ParticipantLoop>
         {isBotTeacher && (
           <div className="absolute bottom-4 left-4 z-10 flex flex-col items-center gap-1.5 rounded-xl border bg-background/80 backdrop-blur-sm p-3 shadow-lg">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
