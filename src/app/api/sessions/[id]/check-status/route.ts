@@ -41,9 +41,10 @@ export const GET = withAuth(async ({ params, profile }) => {
     phase = "waiting_for_teacher"
   }
 
+  const effectiveStart = liveSession.actualStartAt ?? liveSession.teacherJoinedAt
   let remainingSeconds = 0
-  if (liveSession.actualStartAt) {
-    const endTime = liveSession.actualStartAt.getTime() + totalDurationMs
+  if (effectiveStart) {
+    const endTime = effectiveStart.getTime() + totalDurationMs
     remainingSeconds = Math.max(0, Math.floor((endTime - now.getTime()) / 1000))
   }
 

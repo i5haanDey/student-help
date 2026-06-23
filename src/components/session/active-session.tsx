@@ -73,7 +73,7 @@ export function ActiveSession({
   const mediaControlsRef = useRef({ toggleCamera: () => {}, toggleMic: () => {} })
 
   useEffect(() => {
-    setRemaining(initialRemaining)
+    setRemaining((prev) => Math.max(prev, initialRemaining))
   }, [initialRemaining])
 
   useEffect(() => {
