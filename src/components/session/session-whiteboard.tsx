@@ -4,6 +4,7 @@ import { useCallback, useRef, useEffect } from "react"
 import { Tldraw, getSnapshot, loadSnapshot, type TLStore } from "@tldraw/tldraw"
 import type { Editor } from "@tldraw/tldraw"
 import "@tldraw/tldraw/tldraw.css"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
@@ -18,10 +19,18 @@ interface SessionWhiteboardProps {
 }
 
 export function SessionWhiteboard({ sessionId }: SessionWhiteboardProps) {
+  const { resolvedTheme } = useTheme()
   const editorRef = useRef<Editor | null>(null)
+
+  const applyTheme = useCallback((editor: Editor) => {
+    editor.user.updateUserPreferences({
+      colorScheme: resolvedTheme === "dark" ? "dark" : "light",
+    })
+  }, [resolvedTheme])
 
   const handleMount = useCallback((editor: Editor) => {
     editorRef.current = editor
+    applyTheme(editor)
 
     fetch(`/api/sessions/${sessionId}/whiteboard`)
       .then((r) => r.json())
@@ -31,7 +40,12 @@ export function SessionWhiteboard({ sessionId }: SessionWhiteboardProps) {
         }
       })
       .catch(() => {})
-  }, [sessionId])
+  }, [sessionId, applyTheme])
+
+  useEffect(() => {
+    const editor = editorRef.current
+    if (editor) applyTheme(editor)
+  }, [resolvedTheme, applyTheme])
 
   async function saveSnapshot() {
     const editor = editorRef.current

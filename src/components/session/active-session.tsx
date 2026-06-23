@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { LiveKitRoom, VideoConference } from "@livekit/components-react"
+import { LiveKitRoom, ControlBar, ParticipantLoop, ParticipantTile, useRemoteParticipants, useLocalParticipant } from "@livekit/components-react"
 import "@livekit/components-styles"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SessionWhiteboard } from "@/components/session/session-whiteboard"
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX, Wifi, WifiOff, ChevronDown, Bot } from "lucide-react"
+import { Loader2, Monitor, MessageSquare, PenTool, LogOut, X, Clock, UserCheck, UserX, Wifi, WifiOff, ChevronDown, Bot, Video, VideoOff, Mic, MicOff } from "lucide-react"
 import { toast } from "sonner"
 import { PatternBg } from "@/components/ui/pattern-bg"
 
@@ -65,8 +65,10 @@ export function ActiveSession({
   const [extensionActionLoading, setExtensionActionLoading] = useState(false)
   const [isLiveKitConnected, setIsLiveKitConnected] = useState(true)
   const [showTimerDetail, setShowTimerDetail] = useState(false)
+  const [mediaState, setMediaState] = useState({ camera: true, mic: true })
   const lastExtensionNotifRef = useRef(false)
   const disconnectPostedRef = useRef(false)
+  const mediaControlsRef = useRef({ toggleCamera: () => {}, toggleMic: () => {} })
 
   useEffect(() => {
     setRemaining(initialRemaining)
@@ -206,13 +208,33 @@ export function ActiveSession({
             )}
           </div>
 
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowEndConfirm(true)}
-          >
-            <LogOut className="h-4 w-4 mr-1" /> End
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => mediaControlsRef.current.toggleCamera()}
+              className={mediaState.camera ? "text-muted-foreground" : "text-destructive"}
+              title={mediaState.camera ? "Turn camera off" : "Turn camera on"}
+            >
+              {mediaState.camera ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => mediaControlsRef.current.toggleMic()}
+              className={mediaState.mic ? "text-muted-foreground" : "text-destructive"}
+              title={mediaState.mic ? "Mute microphone" : "Unmute microphone"}
+            >
+              {mediaState.mic ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowEndConfirm(true)}
+            >
+              <LogOut className="h-4 w-4 mr-1" /> End
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -285,19 +307,12 @@ export function ActiveSession({
                 onDisconnected={handleDisconnected}
                 className="flex-1"
               >
-                <VideoConference />
-                {isBotTeacher && (
-                  <div className="absolute bottom-4 left-4 z-10 flex flex-col items-center gap-1.5 rounded-xl border bg-background/80 backdrop-blur-sm p-3 shadow-lg">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
-                      {getInitials(otherName)}
-                    </div>
-                    <span className="text-xs font-medium">{otherName}</span>
-                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                      <Bot className="h-3 w-3" />
-                      Bot Teacher
-                    </span>
-                  </div>
-                )}
+                <RoomView
+                  isBotTeacher={isBotTeacher}
+                  otherName={otherName}
+                  onMediaStateChange={setMediaState}
+                  controlsRef={mediaControlsRef}
+                />
               </LiveKitRoom>
             </TabsContent>
 
@@ -321,7 +336,7 @@ export function ActiveSession({
         {/* Mobile chat FAB */}
         <button
           onClick={() => setShowMobileChat(true)}
-          className="lg:hidden fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95"
+          className="lg:hidden fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95"
           aria-label="Open chat"
         >
           <MessageSquare className="h-6 w-6" />
@@ -379,4 +394,63 @@ function getInitials(name: string) {
     .filter(Boolean)
     .join(".")
     .toUpperCase()
+}
+
+interface RoomViewProps {
+  isBotTeacher?: boolean
+  otherName: string
+  onMediaStateChange: (state: { camera: boolean; mic: boolean }) => void
+  controlsRef: React.MutableRefObject<{ toggleCamera: () => void; toggleMic: () => void }>
+}
+
+function RoomView({ isBotTeacher, otherName, onMediaStateChange, controlsRef }: RoomViewProps) {
+  const participants = useRemoteParticipants()
+  const { isCameraEnabled, isMicrophoneEnabled, localParticipant } = useLocalParticipant()
+
+  useEffect(() => {
+    onMediaStateChange({ camera: isCameraEnabled, mic: isMicrophoneEnabled })
+    controlsRef.current = {
+      toggleCamera: () => localParticipant.setCameraEnabled(!isCameraEnabled),
+      toggleMic: () => localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled),
+    }
+  }, [isCameraEnabled, isMicrophoneEnabled, localParticipant, onMediaStateChange, controlsRef])
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 relative">
+        {participants.length > 0 ? (
+          <ParticipantLoop participants={participants}>
+            <ParticipantTile />
+          </ParticipantLoop>
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            Waiting for other participant...
+          </div>
+        )}
+        {isBotTeacher && (
+          <div className="absolute bottom-4 left-4 z-10 flex flex-col items-center gap-1.5 rounded-xl border bg-background/80 backdrop-blur-sm p-3 shadow-lg">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted text-lg font-bold text-foreground">
+              {getInitials(otherName)}
+            </div>
+            <span className="text-xs font-medium">{otherName}</span>
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Bot className="h-3 w-3" />
+              Bot Teacher
+            </span>
+          </div>
+        )}
+      </div>
+      <ControlBar
+        controls={{
+          microphone: true,
+          camera: true,
+          screenShare: true,
+          chat: false,
+          leave: false,
+          settings: false,
+        }}
+        variation="minimal"
+      />
+    </div>
+  )
 }
