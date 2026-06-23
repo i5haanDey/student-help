@@ -73,7 +73,7 @@ export function SessionWhiteboard({ sessionId }: SessionWhiteboardProps) {
         </Button>
       </div>
       <div className="h-full w-full [&_.tl-container]:rounded-none">
-        <Tldraw onMount={handleMount} colorScheme="system" />
+        <Tldraw onMount={handleMount} />
       </div>
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { LiveKitRoom, ControlBar, useTracks, VideoTrack, useLocalParticipant } from "@livekit/components-react"
+import { isTrackReferencePlaceholder } from "@livekit/components-core"
 import { Track } from "livekit-client"
 import "@livekit/components-styles"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -406,7 +407,10 @@ interface RoomViewProps {
 
 function RoomView({ isBotTeacher, otherName, onMediaStateChange, controlsRef }: RoomViewProps) {
   const { isCameraEnabled, isMicrophoneEnabled, localParticipant } = useLocalParticipant()
-  const tracks = useTracks([Track.Source.Camera, Track.Source.ScreenShare])
+  const tracks = useTracks([
+    { source: Track.Source.Camera, withPlaceholder: true },
+    { source: Track.Source.ScreenShare, withPlaceholder: false },
+  ])
 
   useEffect(() => {
     onMediaStateChange({ camera: isCameraEnabled, mic: isMicrophoneEnabled })
@@ -420,9 +424,28 @@ function RoomView({ isBotTeacher, otherName, onMediaStateChange, controlsRef }: 
     <div className="flex flex-col h-full">
       <div className="flex-1 relative">
         <div className="grid grid-cols-2 gap-2 p-2 h-full">
-          {tracks.map((track) => (
-            <VideoTrack key={track.participant.identity + track.source} trackRef={track} />
-          ))}
+          {tracks.map((track) =>
+            isTrackReferencePlaceholder(track) ? (
+              <div
+                key={track.participant.identity + track.source}
+                className="flex items-center justify-center bg-muted rounded-lg h-full"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold text-foreground">
+                    {getInitials(track.participant.name || track.participant.identity)}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {track.participant.name || track.participant.identity}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <VideoTrack
+                key={track.participant.identity + track.source}
+                trackRef={track}
+              />
+            )
+          )}
         </div>
         {isBotTeacher && (
           <div className="absolute bottom-4 left-4 z-10 flex flex-col items-center gap-1.5 rounded-xl border bg-background/80 backdrop-blur-sm p-3 shadow-lg">
