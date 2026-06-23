@@ -19,8 +19,11 @@ interface SessionWhiteboardProps {
 
 export function SessionWhiteboard({ sessionId }: SessionWhiteboardProps) {
   const editorRef = useRef<Editor | null>(null)
+  const mountedRef = useRef(false)
 
   const handleMount = useCallback((editor: Editor) => {
+    if (mountedRef.current) return
+    mountedRef.current = true
     editorRef.current = editor
 
     fetch(`/api/sessions/${sessionId}/whiteboard`)
@@ -32,6 +35,14 @@ export function SessionWhiteboard({ sessionId }: SessionWhiteboardProps) {
       })
       .catch(() => {})
   }, [sessionId])
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false
+      editorRef.current?.dispose()
+      editorRef.current = null
+    }
+  }, [])
 
   async function saveSnapshot() {
     const editor = editorRef.current
@@ -72,7 +83,7 @@ export function SessionWhiteboard({ sessionId }: SessionWhiteboardProps) {
           <Download className="h-4 w-4" />
         </Button>
       </div>
-      <div className="h-full w-full [&_.tl-container]:rounded-none">
+      <div className="h-full w-full">
         <Tldraw onMount={handleMount} />
       </div>
     </div>

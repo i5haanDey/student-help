@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 import { LiveKitRoom, ControlBar, useTracks, VideoTrack, useLocalParticipant } from "@livekit/components-react"
-import { isTrackReferencePlaceholder } from "@livekit/components-core"
 import { Track } from "livekit-client"
 import "@livekit/components-styles"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -425,7 +424,7 @@ function RoomView({ isBotTeacher, otherName, onMediaStateChange, controlsRef }: 
       <div className="flex-1 relative">
         <div className="grid grid-cols-2 gap-2 p-2 h-full">
           {tracks.map((track) =>
-            isTrackReferencePlaceholder(track) ? (
+            !('publication' in track) || !track.publication ? (
               <div
                 key={track.participant.identity + track.source}
                 className="flex items-center justify-center bg-muted rounded-lg h-full"
