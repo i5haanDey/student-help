@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react"
 import { LiveKitRoom, ControlBar, useTracks, VideoTrack, useLocalParticipant } from "@livekit/components-react"
 import { Track } from "livekit-client"
 import "@livekit/components-styles"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SessionWhiteboard } from "@/components/session/session-whiteboard"
 import { SessionChat } from "@/components/session/session-chat"
 import { Button } from "@/components/ui/button"
@@ -290,37 +289,52 @@ export function ActiveSession({
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 flex flex-col min-w-0">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="justify-start px-4 pt-2 border-b rounded-none bg-transparent gap-0 h-auto pb-0">
-              <TabsTrigger value="video" className="flex items-center gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
-                <Monitor className="h-4 w-4" /> Video
-              </TabsTrigger>
-              <TabsTrigger value="whiteboard" className="flex items-center gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2">
-                <PenTool className="h-4 w-4" /> Whiteboard
-              </TabsTrigger>
-            </TabsList>
+          {/* Tab bar */}
+          <div className="flex px-4 pt-2 border-b gap-0">
+            <button
+              onClick={() => setActiveTab("video")}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "video"
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Monitor className="h-4 w-4" /> Video
+            </button>
+            <button
+              onClick={() => setActiveTab("whiteboard")}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "whiteboard"
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <PenTool className="h-4 w-4" /> Whiteboard
+            </button>
+          </div>
 
-            <TabsContent value="video" className="flex-1 p-0 m-0 data-[state=active]:flex flex-col relative">
-              <LiveKitRoom
-                token={token}
-                serverUrl={livekitUrl}
-                connect={true}
-                onDisconnected={handleDisconnected}
-                className="flex-1"
-              >
-                <RoomView
-                  isBotTeacher={isBotTeacher}
-                  otherName={otherName}
-                  onMediaStateChange={setMediaState}
-                  controlsRef={mediaControlsRef}
-                />
-              </LiveKitRoom>
-            </TabsContent>
+          {/* Video panel - always mounted, hidden when not active */}
+          <div className={`flex-1 flex-col relative ${activeTab === "video" ? "flex" : "hidden"}`}>
+            <LiveKitRoom
+              token={token}
+              serverUrl={livekitUrl}
+              connect={true}
+              onDisconnected={handleDisconnected}
+              className="flex-1"
+            >
+              <RoomView
+                isBotTeacher={isBotTeacher}
+                otherName={otherName}
+                onMediaStateChange={setMediaState}
+                controlsRef={mediaControlsRef}
+              />
+            </LiveKitRoom>
+          </div>
 
-            <TabsContent value="whiteboard" className="flex-1 p-0 m-0 data-[state=active]:flex">
-              <SessionWhiteboard sessionId={liveSessionId} />
-            </TabsContent>
-          </Tabs>
+          {/* Whiteboard panel - always mounted, hidden when not active */}
+          <div className={`flex-1 ${activeTab === "whiteboard" ? "flex" : "hidden"}`}>
+            <SessionWhiteboard sessionId={liveSessionId} />
+          </div>
         </div>
 
         {/* Desktop chat */}
