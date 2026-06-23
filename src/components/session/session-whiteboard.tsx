@@ -70,9 +70,9 @@ class ErrorBoundary extends Component<
 
 export function SessionWhiteboard(_props: { sessionId: string }) {
   return (
-    <div className="h-full w-full relative" style={{ isolation: "isolate" }}>
+    <div className="h-full w-full relative bg-white" style={{ isolation: "isolate" }}>
       <ErrorBoundary>
-        <Tldraw />
+        <Tldraw colorScheme="light" />
       </ErrorBoundary>
     </div>
   )
