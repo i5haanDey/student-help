@@ -334,7 +334,7 @@ export function ActiveSession({
               </div>
             )}
             {activeTab === "whiteboard" && (
-              <div className="h-full">
+              <div className="h-full min-h-0">
                 <SessionWhiteboard sessionId={liveSessionId} />
               </div>
             )}
