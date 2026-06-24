@@ -313,35 +313,31 @@ export function ActiveSession({
             </button>
           </div>
 
-          {/* Content area - CSS grid stacking: both panels always mounted, share same cell */}
-          <div className="flex-1" style={{ display: "grid", gridTemplateAreas: '"main"' }}>
-            {/* Video panel */}
-            <div
-              className="bg-background"
-              style={{ gridArea: "main", visibility: activeTab === "video" ? "visible" : "hidden" }}
-            >
-              <LiveKitRoom
-                token={token}
-                serverUrl={livekitUrl}
-                connect={true}
-                onDisconnected={handleDisconnected}
-                className="h-full w-full"
-              >
-                <RoomView
-                  isBotTeacher={isBotTeacher}
-                  otherName={otherName}
-                  onMediaStateChange={setMediaState}
-                  controlsRef={mediaControlsRef}
-                />
-              </LiveKitRoom>
-            </div>
-
-            {/* Whiteboard panel */}
-            <div
-              style={{ gridArea: "main", visibility: activeTab === "whiteboard" ? "visible" : "hidden" }}
-            >
-              <SessionWhiteboard sessionId={liveSessionId} />
-            </div>
+          {/* Content area - conditionally render to avoid tldraw canvas issues */}
+          <div className="flex-1">
+            {activeTab === "video" && (
+              <div className="h-full bg-background">
+                <LiveKitRoom
+                  token={token}
+                  serverUrl={livekitUrl}
+                  connect={true}
+                  onDisconnected={handleDisconnected}
+                  className="h-full w-full"
+                >
+                  <RoomView
+                    isBotTeacher={isBotTeacher}
+                    otherName={otherName}
+                    onMediaStateChange={setMediaState}
+                    controlsRef={mediaControlsRef}
+                  />
+                </LiveKitRoom>
+              </div>
+            )}
+            {activeTab === "whiteboard" && (
+              <div className="h-full">
+                <SessionWhiteboard sessionId={liveSessionId} />
+              </div>
+            )}
           </div>
         </div>
 
