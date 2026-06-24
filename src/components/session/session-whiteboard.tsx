@@ -1,6 +1,6 @@
 "use client"
 
-import { Component, type ReactNode } from "react"
+import { Component, type ReactNode, memo } from "react"
 import { Tldraw } from "@tldraw/tldraw"
 import "@tldraw/tldraw/tldraw.css"
 
@@ -35,7 +35,11 @@ class ErrorBoundary extends Component<
   }
 }
 
-export function SessionWhiteboard({ sessionId }: { sessionId: string }) {
+export const SessionWhiteboard = memo(function SessionWhiteboard({
+  sessionId,
+}: {
+  sessionId: string
+}) {
   return (
     <div className="relative h-full w-full">
       <ErrorBoundary>
@@ -43,4 +47,4 @@ export function SessionWhiteboard({ sessionId }: { sessionId: string }) {
       </ErrorBoundary>
     </div>
   )
-}
+})
