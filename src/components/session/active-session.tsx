@@ -313,27 +313,30 @@ export function ActiveSession({
             </button>
           </div>
 
-          {/* Video panel - always mounted, hidden when not active */}
-          <div className={`flex-1 flex-col relative ${activeTab === "video" ? "flex" : "hidden"}`}>
-            <LiveKitRoom
-              token={token}
-              serverUrl={livekitUrl}
-              connect={true}
-              onDisconnected={handleDisconnected}
-              className="flex-1"
-            >
-              <RoomView
-                isBotTeacher={isBotTeacher}
-                otherName={otherName}
-                onMediaStateChange={setMediaState}
-                controlsRef={mediaControlsRef}
-              />
-            </LiveKitRoom>
-          </div>
+          {/* Content area with relative positioning for absolute panels */}
+          <div className="flex-1 relative">
+            {/* Video panel - always mounted to keep LiveKit connected */}
+            <div className={`absolute inset-0 ${activeTab === "video" ? "" : "invisible pointer-events-none"}`}>
+              <LiveKitRoom
+                token={token}
+                serverUrl={livekitUrl}
+                connect={true}
+                onDisconnected={handleDisconnected}
+                className="h-full w-full"
+              >
+                <RoomView
+                  isBotTeacher={isBotTeacher}
+                  otherName={otherName}
+                  onMediaStateChange={setMediaState}
+                  controlsRef={mediaControlsRef}
+                />
+              </LiveKitRoom>
+            </div>
 
-          {/* Whiteboard panel - always mounted, hidden when not active */}
-          <div className={`flex-1 ${activeTab === "whiteboard" ? "flex" : "hidden"}`}>
-            <SessionWhiteboard sessionId={liveSessionId} />
+            {/* Whiteboard panel - always mounted so tldraw editor state is preserved */}
+            <div className={`absolute inset-0 ${activeTab === "whiteboard" ? "" : "invisible pointer-events-none"}`}>
+              <SessionWhiteboard sessionId={liveSessionId} />
+            </div>
           </div>
         </div>
 
