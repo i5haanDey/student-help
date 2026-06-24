@@ -313,10 +313,10 @@ export function ActiveSession({
             </button>
           </div>
 
-          {/* Content area - whiteboard always fully visible, video overlays on top */}
+          {/* Content area with absolute panels */}
           <div className="flex-1 relative">
-            {/* Video panel - layered above whiteboard when active */}
-            <div className={`absolute inset-0 z-10 transition-opacity duration-200 ${activeTab === "video" ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+            {/* Video panel - always mounted, solid bg covers content underneath when visible */}
+            <div className="absolute inset-0 bg-background">
               <LiveKitRoom
                 token={token}
                 serverUrl={livekitUrl}
@@ -333,10 +333,12 @@ export function ActiveSession({
               </LiveKitRoom>
             </div>
 
-            {/* Whiteboard panel - always mounted and always visible underneath */}
-            <div className="absolute inset-0 z-0">
-              <SessionWhiteboard sessionId={liveSessionId} />
-            </div>
+            {/* Whiteboard panel - only mounted when active so tldraw initializes with proper dimensions */}
+            {activeTab === "whiteboard" && (
+              <div className="absolute inset-0">
+                <SessionWhiteboard sessionId={liveSessionId} />
+              </div>
+            )}
           </div>
         </div>
 
