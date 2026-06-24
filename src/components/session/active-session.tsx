@@ -313,10 +313,13 @@ export function ActiveSession({
             </button>
           </div>
 
-          {/* Content area with absolute panels */}
-          <div className="flex-1 relative">
-            {/* Video panel - always mounted, solid bg covers content underneath when visible */}
-            <div className="absolute inset-0 bg-background">
+          {/* Content area - CSS grid stacking: both panels always mounted, share same cell */}
+          <div className="flex-1" style={{ display: "grid", gridTemplateAreas: '"main"' }}>
+            {/* Video panel */}
+            <div
+              className="bg-background"
+              style={{ gridArea: "main", visibility: activeTab === "video" ? "visible" : "hidden" }}
+            >
               <LiveKitRoom
                 token={token}
                 serverUrl={livekitUrl}
@@ -333,12 +336,12 @@ export function ActiveSession({
               </LiveKitRoom>
             </div>
 
-            {/* Whiteboard panel - only mounted when active so tldraw initializes with proper dimensions */}
-            {activeTab === "whiteboard" && (
-              <div className="absolute inset-0">
-                <SessionWhiteboard sessionId={liveSessionId} />
-              </div>
-            )}
+            {/* Whiteboard panel */}
+            <div
+              style={{ gridArea: "main", visibility: activeTab === "whiteboard" ? "visible" : "hidden" }}
+            >
+              <SessionWhiteboard sessionId={liveSessionId} />
+            </div>
           </div>
         </div>
 
