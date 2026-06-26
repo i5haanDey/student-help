@@ -24,6 +24,7 @@ import {
 import Link from "next/link"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { GreetingHeader } from "@/components/dashboard/greeting-header"
+import { QuoteOfTheDay } from "@/components/dashboard/quote-of-the-day"
 import {
   Card,
   CardContent,
@@ -134,6 +135,10 @@ export function StudentDashboardClient({
           role="student"
           subtitle="Here&apos;s your learning overview for today."
         />
+      </AssemblyItem>
+
+      <AssemblyItem>
+        <QuoteOfTheDay />
       </AssemblyItem>
 
       <AssemblyItem>
